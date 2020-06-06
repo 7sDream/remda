@@ -1,13 +1,14 @@
-use {super::Geometry, crate::types::Point3, log::info};
+use {super::Geometry, crate::types::Point3};
 
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    radius_squared: f64,
 }
 
 impl Sphere {
     pub fn new(center: Point3, radius: f64) -> Self {
-        Self { center, radius }
+        Self { center, radius, radius_squared: radius * radius }
     }
 }
 
@@ -18,23 +19,26 @@ impl Geometry for Sphere {
     // let O - C = L
     // (tD + L)^2 = r^2
     // D^2 t^2 + 2DLt + L^2- r^2 = 0
-    // a = D^2, b = 2DL, c = L^2 - r^2
+    // a = D^2, b = 2(DL), c = L^2 - r^2
     // Delta = b^2 - 4ac = 4(DL)^2 - 4 D^2 (L^2 - r2)
     // So, check (DL)^2 - D^2(L^2 - r^2)
-    fn check_ray_hits(&self, r: &crate::types::Ray) -> bool {
+    // root is
+    fn hit_by_ray(&self, r: &crate::types::Ray) -> Option<Point3> {
         let l = &r.origin - &self.center;
-        let dl2 = r.direction.dot(&l).powi(2);
+        let dl = r.direction.dot(&l);
+        let dl2 = dl.powi(2);
         let d2 = r.direction.length_squared();
         let l2 = l.length_squared();
-        let r2 = self.radius * self.radius;
-        let delta = dl2 - d2 * (l2 - r2);
-        if r.direction.x.abs() < 0.01 && r.direction.y.abs() < 0.01 {
-            info!("ray: {}, delta: {}", r.direction, delta);
-            info!("l: {}", l);
-            info!("dl^2: {}", dl2);
-            info!("l2: {}", l2);
-            info!("r2: {}", r2);
+        let delta = dl2 - d2 * (l2 - self.radius_squared);
+
+        if delta > 0.0 {
+            Some(r.at((-dl - delta.sqrt()) / d2))
+        } else {
+            None
         }
-        delta > 0.0
+    }
+
+    fn normal(&self, p: &Point3) -> crate::types::Vec3 {
+        (p - &self.center).unit()
     }
 }

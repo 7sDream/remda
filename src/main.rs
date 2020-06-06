@@ -44,8 +44,8 @@ fn main() {
             let u = col as f64 / (image_width - 1) as f64;
             let v = (image_height - 1 - row) as f64 / (image_height - 1) as f64;
             let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v - &origin);
-            if let Some(p) = sphere.hit_by_ray(&r) {
-                ((sphere.normal(&p) + Vec3::new(1.0, 1.0, 1.0)) * 0.5).into()
+            if let Some(record) = sphere.hit(&r, 0.0..) {
+                ((record.normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5).into()
             } else {
                 ray_color(&r)
             }

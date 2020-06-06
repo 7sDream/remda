@@ -23,16 +23,16 @@ impl Geometry for Sphere {
     // Delta = b^2 - 4ac = 4(DL)^2 - 4 D^2 (L^2 - r2)
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
-    fn hit_by_ray(&self, r: &crate::types::Ray) -> Option<Point3> {
+    fn hit_time(&self, r: &crate::types::Ray) -> Option<(f64, f64)> {
         let l = &r.origin - &self.center;
-        let dl = r.direction.dot(&l);
-        let dl2 = dl.powi(2);
-        let d2 = r.direction.length_squared();
-        let l2 = l.length_squared();
-        let delta = dl2 - d2 * (l2 - self.radius_squared);
+        let half_b = r.direction.dot(&l);
+        let a = r.direction.length_squared();
+        let c = l.length_squared() - self.radius_squared;
+        let delta = half_b * half_b - a * c;
 
-        if delta > 0.0 {
-            Some(r.at((-dl - delta.sqrt()) / d2))
+        if delta >= 0.0 {
+            let sqrt = delta.sqrt();
+            Some(((-half_b - sqrt) / a, (-half_b + sqrt) / a))
         } else {
             None
         }

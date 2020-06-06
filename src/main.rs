@@ -6,20 +6,18 @@
 
 use env_logger;
 
-mod color;
+mod geometry;
 mod image;
-mod ray;
-mod vec3;
+mod types;
 
 use {
-    color::Color,
+    geometry::{Geometry, Sphere},
     image::Painter,
-    log::info,
-    ray::Ray,
-    vec3::{Point3, Vec3},
+    // log::info,
+    types::{Color, Point3, Ray, Vec3},
 };
 
-fn ray_color(r: &ray::Ray) -> Color {
+fn ray_color(r: &Ray) -> Color {
     let unit = r.direction.unit();
     let t = 0.5 * (unit.y + 1.0);
     let c = (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0);
@@ -38,16 +36,19 @@ fn main() {
     let origin = Point3::default();
     let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
     let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lb =
-        &origin - &horizontal / 2.0 - &vertical / 2.0 - vec3::Vec3::new(0.0, 0.0, focal_length);
+    let lb = &origin - &horizontal / 2.0 - &vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
     let painter = Painter::new(image_width, image_height);
+    let sphere = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5);
     painter
         .draw("first.ppm", |row, col| {
             let u = col as f64 / (image_width - 1) as f64;
             let v = (image_height - 1 - row) as f64 / (image_height - 1) as f64;
             let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v - &origin);
-            info!("{} {} = {}", row, col, r.direction);
-            ray_color(&r)
+            if sphere.check_ray_hits(&r) {
+                Color::new(255, 0, 0)
+            } else {
+                ray_color(&r)
+            }
         })
         .unwrap();
 }

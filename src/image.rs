@@ -9,7 +9,7 @@ use {
     },
 };
 
-use super::color::Color;
+use crate::types::Color;
 
 pub struct Image {
     width: usize,
@@ -90,7 +90,6 @@ impl IndexMut<usize> for Image {
         self.colors.index_mut(index)
     }
 }
-
 pub struct Painter {
     pub width: usize,
     pub height: usize,

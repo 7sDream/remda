@@ -14,6 +14,7 @@ mod vec3;
 use {
     color::Color,
     image::Painter,
+    log::info,
     ray::Ray,
     vec3::{Point3, Vec3},
 };
@@ -39,13 +40,13 @@ fn main() {
     let vertical = Vec3::new(0.0, viewport_height, 0.0);
     let lb =
         &origin - &horizontal / 2.0 - &vertical / 2.0 - vec3::Vec3::new(0.0, 0.0, focal_length);
-
     let painter = Painter::new(image_width, image_height);
     painter
         .draw("first.ppm", |row, col| {
-            let u = col as f64 / (image_height - 1) as f64;
-            let v = (image_height - row) as f64 / (image_height - 1) as f64;
-            let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v);
+            let u = col as f64 / (image_width - 1) as f64;
+            let v = (image_height - 1 - row) as f64 / (image_height - 1) as f64;
+            let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v - &origin);
+            info!("{} {} = {}", row, col, r.direction);
             ray_color(&r)
         })
         .unwrap();

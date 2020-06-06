@@ -11,6 +11,19 @@ pub struct HitRecord {
     pub point: Point3,
     pub normal: Vec3,
     pub t: f64,
+    pub outside: bool,
+}
+
+impl HitRecord {
+    pub fn new<G: Geometry + ?Sized>(r: &Ray, object: &G, t: f64) -> Self {
+        let point = r.at(t);
+        let mut normal = object.normal(&point);
+        let outside = r.direction.dot(&normal) < 0.0;
+        if !outside {
+            normal.reverse();
+        }
+        Self { point, normal, t, outside }
+    }
 }
 
 pub trait Geometry {
@@ -26,8 +39,6 @@ pub trait Geometry {
         } else {
             return None;
         };
-        let point = r.at(*t);
-        let normal = self.normal(&point);
-        Some(HitRecord { point, normal, t: *t })
+        Some(HitRecord::new(r, self, *t))
     }
 }

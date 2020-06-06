@@ -25,6 +25,12 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
+    pub fn reverse(&mut self) {
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
+    }
+
     pub fn dot(&self, rhs: &Self) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }

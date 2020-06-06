@@ -8,13 +8,12 @@ use env_logger;
 
 mod geometry;
 mod image;
-mod types;
+mod prelude;
 
 use {
     geometry::{Geometry, Sphere},
     image::Painter,
-    // log::info,
-    types::{Color, Point3, Ray, Vec3},
+    prelude::*,
 };
 
 fn ray_color(r: &Ray) -> Color {
@@ -44,7 +43,7 @@ fn main() {
             let u = col as f64 / (image_width - 1) as f64;
             let v = (image_height - 1 - row) as f64 / (image_height - 1) as f64;
             let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v - &origin);
-            if let Some(record) = sphere.hit(&r, 0.0..) {
+            if let Some(record) = sphere.hit(&r, 0.0..f64::INFINITY) {
                 ((record.normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5).into()
             } else {
                 ray_color(&r)

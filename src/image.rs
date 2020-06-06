@@ -9,7 +9,7 @@ use {
     },
 };
 
-use crate::types::Color;
+use crate::prelude::*;
 
 pub struct Image {
     width: usize,

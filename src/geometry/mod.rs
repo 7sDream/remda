@@ -1,9 +1,7 @@
 mod sphere;
+mod world;
 
-use {
-    crate::types::{Point3, Ray, Vec3},
-    std::ops::RangeBounds,
-};
+use {crate::prelude::*, std::ops::Range};
 
 pub use sphere::Sphere;
 
@@ -27,18 +25,6 @@ impl HitRecord {
 }
 
 pub trait Geometry {
-    fn hit_time(&self, r: &Ray) -> Option<(f64, f64)>;
     fn normal(&self, p: &Point3) -> Vec3;
-
-    fn hit<R: RangeBounds<f64>>(&self, r: &Ray, limit: R) -> Option<HitRecord> {
-        let (t1, t2) = self.hit_time(r)?;
-        let t = if limit.contains(&t1) {
-            &t1
-        } else if limit.contains(&t2) {
-            &t2
-        } else {
-            return None;
-        };
-        Some(HitRecord::new(r, self, *t))
-    }
+    fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord>;
 }

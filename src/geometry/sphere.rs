@@ -1,4 +1,8 @@
-use {super::Geometry, crate::types::Point3};
+use std::ops::Range;
+use {
+    super::{Geometry, HitRecord},
+    crate::prelude::*,
+};
 
 pub struct Sphere {
     center: Point3,
@@ -23,22 +27,33 @@ impl Geometry for Sphere {
     // Delta = b^2 - 4ac = 4(DL)^2 - 4 D^2 (L^2 - r2)
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
-    fn hit_time(&self, r: &crate::types::Ray) -> Option<(f64, f64)> {
+    fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord> {
         let l = &r.origin - &self.center;
         let half_b = r.direction.dot(&l);
         let a = r.direction.length_squared();
         let c = l.length_squared() - self.radius_squared;
         let delta = half_b * half_b - a * c;
 
-        if delta >= 0.0 {
-            let sqrt = delta.sqrt();
-            Some(((-half_b - sqrt) / a, (-half_b + sqrt) / a))
-        } else {
-            None
+        if delta < 0.0 {
+            return None;
         }
+
+        let sqrt = delta.sqrt();
+
+        let t = (-half_b - sqrt) / a;
+        if limit.contains(&t) {
+            return Some(HitRecord::new(r, self, t));
+        }
+
+        let t = (-half_b + sqrt) / a;
+        if limit.contains(&t) {
+            return Some(HitRecord::new(r, self, t));
+        }
+
+        None
     }
 
-    fn normal(&self, p: &Point3) -> crate::types::Vec3 {
+    fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
         (p - &self.center).unit()
     }
 }

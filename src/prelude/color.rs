@@ -1,4 +1,4 @@
-use {super::vec3::Vec3, std::borrow::Cow};
+use std::borrow::Cow;
 
 macro_rules! check0to1 {
     ($r: ident, $g: ident, $b: ident) => {
@@ -67,12 +67,6 @@ impl Color {
             Color::RGBF(c) => Cow::Owned(c.into()),
             Color::RGBI(c) => Cow::Borrowed(c),
         }
-    }
-}
-
-impl From<Vec3> for Color {
-    fn from(v: Vec3) -> Self {
-        Color::newf(v.x as f32, v.y as f32, v.z as f32)
     }
 }
 

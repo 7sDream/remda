@@ -6,50 +6,44 @@
 
 use env_logger;
 
+mod camera;
 mod geometry;
 mod image;
 mod prelude;
 
 use {
+    camera::Camera,
     geometry::{Geometry, Sphere, World},
-    image::Painter,
     prelude::*,
 };
 
-fn bg_color(r: &Ray) -> Color {
+fn normal_color(normal: &Vec3) -> Vec3 {
+    (normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5
+}
+
+fn bg_color(r: &Ray) -> Vec3 {
     let unit = r.direction.unit();
     let t = 0.5 * (unit.y + 1.0);
-    let c = (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0);
-    c.into()
+    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
 fn main() {
     env_logger::init();
 
-    let aspect_radio = 16.0 / 9.0;
-    let image_width = 384usize;
-    let image_height = (image_width as f64 / aspect_radio) as usize;
-    let viewport_height = 2.0;
-    let viewport_width = viewport_height * aspect_radio;
-    let focal_length = 1.0;
     let origin = Point3::default();
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lb = &origin - &horizontal / 2.0 - &vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
-    let painter = Painter::new(image_width, image_height);
-
+    let camera = Camera::new(origin.clone());
     let mut world = World::new();
     world
         .add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5))
         .add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
 
-    painter
-        .draw("first.ppm", |row, col| {
-            let u = col as f64 / (image_width - 1) as f64;
-            let v = (image_height - 1 - row) as f64 / (image_height - 1) as f64;
-            let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v - &origin);
+    camera
+        .painter(384)
+        .set_samples(100)
+        .draw("first.ppm", |u, v| {
+            let r = camera.ray(u, v);
             if let Some(record) = world.hit(&r, 0.0..f64::INFINITY) {
-                ((record.normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5).into()
+                normal_color(&record.normal)
             } else {
                 bg_color(&r)
             }

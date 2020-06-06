@@ -93,17 +93,23 @@ impl IndexMut<usize> for Image {
 pub struct Painter {
     pub width: usize,
     pub height: usize,
+    samples: usize,
 }
 
 impl Painter {
     pub fn new(width: usize, height: usize) -> Self {
-        Self { width, height }
+        Self { width, height, samples: 1 }
+    }
+
+    pub fn set_samples(mut self, samples: usize) -> Self {
+        self.samples = samples;
+        self
     }
 
     pub fn draw<P, F>(&self, path: P, mut f: F) -> std::io::Result<()>
     where
         P: AsRef<Path>,
-        F: FnMut(usize, usize) -> Color,
+        F: FnMut(f64, f64) -> Vec3,
     {
         let mut file = BufWriter::new(File::create(path.as_ref())?);
         write!(&mut file, "P3\n{width} {height}\n255\n", width = self.width, height = self.height)?;
@@ -111,7 +117,15 @@ impl Painter {
         for row in 0..self.height {
             info!("Scan line remaining: {}", self.height - row);
             for column in 0..self.width {
-                let color = f(row, column);
+                let color: Vec3 = (0..self.samples)
+                    .map(|_| {
+                        let u = (column as f64 + Random::normal()) / (self.width - 1) as f64;
+                        let v = ((self.height - 1 - row) as f64 + Random::normal())
+                            / (self.height - 1) as f64;
+                        f(u, v)
+                    })
+                    .sum();
+                let color = color.into_color(self.samples);
                 let color = color.i();
                 write!(&mut file, "{r} {g} {b}\n", r = color.r, g = color.g, b = color.b)?;
             }

@@ -1,6 +1,12 @@
-use std::{
-    fmt::Display,
-    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign},
+use {
+    super::Color,
+    std::{
+        fmt::Display,
+        iter::Sum,
+        ops::{
+            Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+        },
+    },
 };
 
 #[derive(Default, Clone, Debug)]
@@ -45,6 +51,11 @@ impl Vec3 {
 
     pub fn unit(&self) -> Self {
         self / self.length()
+    }
+
+    pub fn into_color(mut self, sample_count: usize) -> Color {
+        self /= sample_count as f64;
+        Color::newf(self.x as f32, self.y as f32, self.z as f32)
     }
 }
 
@@ -189,6 +200,13 @@ impl Mul<Vec3> for f64 {
     }
 }
 
+impl Mul<&Vec3> for f64 {
+    type Output = Vec3;
+    fn mul(self, rhs: &Vec3) -> Self::Output {
+        Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
+    }
+}
+
 impl Div<f64> for &Vec3 {
     type Output = Vec3;
     fn div(self, rhs: f64) -> Self::Output {
@@ -264,5 +282,11 @@ impl DivAssign<f64> for Vec3 {
         self.x /= rhs;
         self.y /= rhs;
         self.z /= rhs;
+    }
+}
+
+impl Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Vec3::default(), |acc, val| acc + val)
     }
 }

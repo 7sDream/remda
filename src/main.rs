@@ -11,8 +11,42 @@ mod image;
 mod ray;
 mod vec3;
 
+use {
+    color::Color,
+    image::Painter,
+    ray::Ray,
+    vec3::{Point3, Vec3},
+};
+
+fn ray_color(r: &ray::Ray) -> Color {
+    let unit = r.direction.unit();
+    let t = 0.5 * (unit.y + 1.0);
+    let c = (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0);
+    c.into()
+}
+
 fn main() {
     env_logger::init();
-    let painter = image::Painter::new(256, 256, "first.ppm").unwrap();
-    painter.draw(|row, col| color::Color::new(col as u8, 255 - row as u8, 64)).unwrap();
+
+    let aspect_radio = 16.0 / 9.0;
+    let image_width = 384usize;
+    let image_height = (image_width as f64 / aspect_radio) as usize;
+    let viewport_height = 2.0;
+    let viewport_width = viewport_height * aspect_radio;
+    let focal_length = 1.0;
+    let origin = Point3::default();
+    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+    let vertical = Vec3::new(0.0, viewport_height, 0.0);
+    let lb =
+        &origin - &horizontal / 2.0 - &vertical / 2.0 - vec3::Vec3::new(0.0, 0.0, focal_length);
+
+    let painter = Painter::new(image_width, image_height);
+    painter
+        .draw("first.ppm", |row, col| {
+            let u = col as f64 / (image_height - 1) as f64;
+            let v = (image_height - row) as f64 / (image_height - 1) as f64;
+            let r = Ray::new(origin.clone(), &lb + &horizontal * u + &vertical * v);
+            ray_color(&r)
+        })
+        .unwrap();
 }

@@ -9,23 +9,14 @@ use env_logger;
 mod camera;
 mod geometry;
 mod image;
+mod material;
 mod prelude;
 
 use {
     camera::Camera,
-    geometry::{Geometry, Sphere, World},
+    geometry::{Sphere, World},
     prelude::*,
 };
-
-fn normal_color(normal: &Vec3) -> Vec3 {
-    (normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5
-}
-
-fn bg_color(r: &Ray) -> Vec3 {
-    let unit = r.direction.unit();
-    let t = 0.5 * (unit.y + 1.0);
-    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
-}
 
 fn main() {
     env_logger::init();
@@ -42,11 +33,7 @@ fn main() {
         .set_samples(100)
         .draw("first.ppm", |u, v| {
             let r = camera.ray(u, v);
-            if let Some(record) = world.hit(&r, 0.0..f64::INFINITY) {
-                normal_color(&record.normal)
-            } else {
-                bg_color(&r)
-            }
+            material::diffuse(&r, &world, 50)
         })
         .unwrap();
 }

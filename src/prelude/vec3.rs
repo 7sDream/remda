@@ -1,10 +1,11 @@
 use {
-    super::Color,
+    super::{Color, Random, PI},
     std::{
         fmt::Display,
         iter::Sum,
         ops::{
-            Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+            Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub,
+            SubAssign,
         },
     },
 };
@@ -21,6 +22,39 @@ pub type Point3 = Vec3;
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn random_in_unit_box() -> Self {
+        Self::new(Random::normal(), Random::normal(), Random::normal())
+    }
+
+    pub fn random_range(r: Range<f64>) -> Self {
+        Self::new(Random::range(r.clone()), Random::range(r.clone()), Random::range(r.clone()))
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Vec3::random_in_unit_box();
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
+    pub fn random_unit() -> Self {
+        let a = Random::range(0.0..(2.0 * PI));
+        let z = Random::range(-1.0..1.0);
+        let r = (1.0 - z * z).sqrt();
+        Self::new(r * a.cos(), r * a.sin(), z)
+    }
+
+    pub fn random_unit_dir(dir: &Vec3) -> Self {
+        let u = Self::random_unit();
+        if u.dot(dir) > 0.0 {
+            u
+        } else {
+            -u
+        }
     }
 
     pub fn length_squared(&self) -> f64 {
@@ -55,7 +89,7 @@ impl Vec3 {
 
     pub fn into_color(mut self, sample_count: usize) -> Color {
         self /= sample_count as f64;
-        Color::newf(self.x as f32, self.y as f32, self.z as f32)
+        Color::newf(self.x.sqrt() as f32, self.y.sqrt() as f32, self.z.sqrt() as f32)
     }
 }
 
@@ -89,6 +123,13 @@ impl IndexMut<usize> for Vec3 {
 }
 
 impl Neg for &Vec3 {
+    type Output = Vec3;
+    fn neg(self) -> Self::Output {
+        Vec3::new(-self.x, -self.y, -self.z)
+    }
+}
+
+impl Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Self::Output {
         Vec3::new(-self.x, -self.y, -self.z)

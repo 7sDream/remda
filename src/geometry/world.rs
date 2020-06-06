@@ -4,7 +4,7 @@ use {
     std::{ops::Range, rc::Rc},
 };
 
-struct World {
+pub struct World {
     objects: Vec<Rc<dyn Geometry>>,
 }
 
@@ -38,6 +38,6 @@ impl Geometry for World {
         self.objects
             .iter()
             .filter_map(|object| object.hit(r, limit.clone()))
-            .max_by(|r1, r2| r1.t.partial_cmp(&r2.t).unwrap())
+            .min_by(|r1, r2| r1.t.partial_cmp(&r2.t).unwrap())
     }
 }

@@ -3,7 +3,7 @@ mod world;
 
 use {crate::prelude::*, std::ops::Range};
 
-pub use sphere::Sphere;
+pub use {sphere::Sphere, world::World};
 
 pub struct HitRecord {
     pub point: Point3,

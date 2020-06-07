@@ -22,12 +22,6 @@ impl RGBFloat {
     }
 }
 
-impl<'a> Into<RGBInt> for &'a RGBFloat {
-    fn into(self) -> RGBInt {
-        RGBInt::new((self.r * 255.0) as u8, (self.g * 255.0) as u8, (self.b * 255.0) as u8)
-    }
-}
-
 #[derive(Debug, Clone, Default)]
 pub struct RGBInt {
     pub r: u8,
@@ -38,6 +32,19 @@ pub struct RGBInt {
 impl RGBInt {
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self { r, g, b }
+    }
+}
+
+impl From<&RGBFloat> for RGBInt {
+    fn from(c: &RGBFloat) -> RGBInt {
+        RGBInt::new((c.r * 255.0) as u8, (c.g * 255.0) as u8, (c.b * 255.0) as u8)
+    }
+}
+
+impl From<&RGBInt> for RGBFloat {
+    fn from(c: &RGBInt) -> Self {
+        let s = 1.0 / 255.0;
+        RGBFloat::new(c.r as f32 * s, c.g as f32 * s, c.b as f32 * s)
     }
 }
 
@@ -66,6 +73,13 @@ impl Color {
         match self {
             Color::RGBF(c) => Cow::Owned(c.into()),
             Color::RGBI(c) => Cow::Borrowed(c),
+        }
+    }
+
+    pub fn f(&self) -> Cow<'_, RGBFloat> {
+        match self {
+            Color::RGBF(c) => Cow::Borrowed(c),
+            Color::RGBI(c) => Cow::Owned(c.into()),
         }
     }
 }

@@ -132,7 +132,7 @@ impl Neg for &Vec3 {
 impl Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Self::Output {
-        Vec3::new(-self.x, -self.y, -self.z)
+        -&self
     }
 }
 
@@ -146,21 +146,21 @@ impl Add<Self> for &Vec3 {
 impl Add<Vec3> for &Vec3 {
     type Output = Vec3;
     fn add(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+        self + &rhs
     }
 }
 
 impl Add<Self> for Vec3 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
-        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+        &self + &rhs
     }
 }
 
 impl Add<&Self> for Vec3 {
     type Output = Self;
     fn add(self, rhs: &Self) -> Self::Output {
-        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+        &self + rhs
     }
 }
 
@@ -174,21 +174,21 @@ impl Sub<Self> for &Vec3 {
 impl Sub<Vec3> for &Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+        self - &rhs
     }
 }
 
 impl Sub<Self> for Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: Self) -> Self::Output {
-        Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+        &self - &rhs
     }
 }
 
 impl Sub<&Self> for Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: &Self) -> Self::Output {
-        Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+        &self - rhs
     }
 }
 
@@ -202,21 +202,78 @@ impl Mul<Self> for &Vec3 {
 impl Mul<Vec3> for &Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
+        self * &rhs
     }
 }
 
 impl Mul<Self> for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: Self) -> Self::Output {
-        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
+        &self * &rhs
     }
 }
 
 impl Mul<&Self> for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: &Self) -> Self::Output {
-        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
+        &self * rhs
+    }
+}
+
+impl Mul<&Color> for &Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: &Color) -> Self::Output {
+        let rhs = rhs.f();
+        Vec3::new(self.x * rhs.r as f64, self.y * rhs.g as f64, self.z * rhs.b as f64)
+    }
+}
+
+impl Mul<Color> for &Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: Color) -> Self::Output {
+        self * &rhs
+    }
+}
+
+impl Mul<Color> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: Color) -> Self::Output {
+        &self * &rhs
+    }
+}
+
+impl Mul<&Color> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: &Color) -> Self::Output {
+        &self * rhs
+    }
+}
+
+impl Mul<&Vec3> for &Color {
+    type Output = Vec3;
+    fn mul(self, rhs: &Vec3) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl Mul<&Vec3> for Color {
+    type Output = Vec3;
+    fn mul(self, rhs: &Vec3) -> Self::Output {
+        &self * rhs
+    }
+}
+
+impl Mul<Vec3> for Color {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        &self * &rhs
+    }
+}
+
+impl Mul<Vec3> for &Color {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        self * &rhs
     }
 }
 
@@ -230,21 +287,21 @@ impl Mul<f64> for &Vec3 {
 impl Mul<f64> for Vec3 {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self::Output {
-        Self::new(self.x * rhs, self.y * rhs, self.z * rhs)
+        &self * rhs
     }
 }
 
 impl Mul<Vec3> for f64 {
     type Output = Vec3;
     fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
+        rhs * self
     }
 }
 
 impl Mul<&Vec3> for f64 {
     type Output = Vec3;
     fn mul(self, rhs: &Vec3) -> Self::Output {
-        Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
+        rhs * self
     }
 }
 
@@ -329,5 +386,12 @@ impl DivAssign<f64> for Vec3 {
 impl Sum for Vec3 {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Vec3::default(), |acc, val| acc + val)
+    }
+}
+
+impl From<Color> for Vec3 {
+    fn from(c: Color) -> Self {
+        let c = c.f();
+        Self::new(c.r as f64, c.g as f64, c.b as f64)
     }
 }

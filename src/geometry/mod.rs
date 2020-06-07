@@ -1,13 +1,18 @@
 mod sphere;
 mod world;
 
-use {crate::prelude::*, std::ops::Range};
+use {
+    crate::material::Material,
+    crate::prelude::*,
+    std::{ops::Range, rc::Rc},
+};
 
 pub use {sphere::Sphere, world::World};
 
 pub struct HitRecord {
     pub point: Point3,
     pub normal: Vec3,
+    pub material: Rc<dyn Material>,
     pub t: f64,
     pub outside: bool,
 }
@@ -20,11 +25,13 @@ impl HitRecord {
         if !outside {
             normal.reverse();
         }
-        Self { point, normal, t, outside }
+        let material = object.material();
+        Self { point, normal, material, t, outside }
     }
 }
 
 pub trait Geometry {
     fn normal(&self, p: &Point3) -> Vec3;
+    fn material(&self) -> Rc<dyn Material>;
     fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord>;
 }

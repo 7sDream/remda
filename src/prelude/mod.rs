@@ -14,6 +14,7 @@ pub use {
 };
 
 pub use std::f64::consts::PI;
+pub use std::f64::INFINITY;
 
 pub fn d2r(d: f64) -> f64 {
     d * PI / 180.0

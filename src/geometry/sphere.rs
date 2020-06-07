@@ -1,18 +1,20 @@
-use std::ops::Range;
 use {
     super::{Geometry, HitRecord},
-    crate::prelude::*,
+    crate::{material::Material, prelude::*},
+    std::{ops::Range, rc::Rc},
 };
 
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    material: Rc<dyn Material>,
     radius_squared: f64,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64) -> Self {
-        Self { center, radius, radius_squared: radius * radius }
+    pub fn new<M: Material + 'static>(center: Point3, radius: f64, material: M) -> Self {
+        let material = Rc::new(material);
+        Self { center, radius, material, radius_squared: radius * radius }
     }
 }
 
@@ -55,5 +57,9 @@ impl Geometry for Sphere {
 
     fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
         (p - &self.center).unit()
+    }
+
+    fn material(&self) -> Rc<dyn Material> {
+        self.material.clone()
     }
 }

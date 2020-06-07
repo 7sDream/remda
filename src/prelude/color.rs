@@ -5,9 +5,9 @@ use {
 
 macro_rules! check0to1 {
     ($r: ident, $g: ident, $b: ident) => {
-        assert!(0.0 <= $r && $r <= 1.0, "r = {}", $r);
-        assert!(0.0 <= $g && $g <= 1.0, "g = {}", $g);
-        assert!(0.0 <= $b && $b <= 1.0, "b = {}", $b);
+        debug_assert!(0.0 <= $r && $r <= 1.0, "r = {}", $r);
+        debug_assert!(0.0 <= $g && $g <= 1.0, "g = {}", $g);
+        debug_assert!(0.0 <= $b && $b <= 1.0, "b = {}", $b);
     };
 }
 

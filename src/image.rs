@@ -147,9 +147,9 @@ impl Painter {
             for column in 0..self.width {
                 let color: Vec3 = (0..self.samples)
                     .map(|_| {
-                        let u = (column as f64 + Random::normal()) / (self.width - 1) as f64;
+                        let u = (column as f64 + Random::normal()) / self.width as f64;
                         let v = ((self.height - 1 - row) as f64 + Random::normal())
-                            / (self.height - 1) as f64;
+                            / self.height as f64;
                         f(u, v)
                     })
                     .sum();

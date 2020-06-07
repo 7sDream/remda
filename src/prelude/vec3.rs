@@ -70,6 +70,15 @@ impl Vec3 {
         }
     }
 
+    pub fn random_unit_disk() -> Self {
+        loop {
+            let p = Vec3::new(Random::range(-1.0..1.0), Random::range(-1.0..1.0), 0.0);
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }

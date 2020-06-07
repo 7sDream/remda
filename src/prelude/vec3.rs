@@ -45,6 +45,15 @@ impl Vec3 {
         }
     }
 
+    pub fn random_in_unit_hemisphere(dir: &Vec3) -> Self {
+        let u = Self::random_in_unit_sphere();
+        if u.dot(dir) > 0.0 {
+            u
+        } else {
+            -u
+        }
+    }
+
     pub fn random_unit() -> Self {
         let a = Random::range(0.0..(2.0 * PI));
         let z = Random::range(-1.0..1.0);

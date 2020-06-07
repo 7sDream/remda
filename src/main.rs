@@ -15,7 +15,7 @@ mod prelude;
 use {
     camera::Camera,
     geometry::{Geometry, Sphere, World},
-    material::{Lambertian, Metal},
+    material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
 };
 
@@ -54,7 +54,7 @@ fn main() {
         .add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Color::newf(0.7, 0.3, 0.3)),
+            Lambertian::new(Color::newf(0.1, 0.2, 0.5)),
         ))
         .add(Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
@@ -64,16 +64,21 @@ fn main() {
         .add(Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Color::newf(0.8, 0.6, 0.2)),
+            Metal::new(Color::newf(0.8, 0.6, 0.2)).fuzz(0.3),
         ))
         .add(Sphere::new(
             Point3::new(-1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Color::newf(0.8, 0.8, 0.8)),
+            Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5, Glass {}),
+        ))
+        .add(Sphere::new(
+            Point3::new(-1.0, 0.0, -1.0),
+            -0.45,
+            Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5, Glass {}),
         ));
 
     camera
-        .painter(384)
+        .painter(640)
         .set_samples(256)
         .draw("first.ppm", |u, v| {
             let r = camera.ray(u, v);

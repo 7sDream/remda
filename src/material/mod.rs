@@ -1,9 +1,14 @@
 use crate::{geometry::HitRecord, prelude::*};
 
+mod dielectric;
 mod lambertian;
 mod metal;
 
-pub use {lambertian::Lambertian, metal::Metal};
+pub use {
+    dielectric::{Dielectric, Glass},
+    lambertian::Lambertian,
+    metal::Metal,
+};
 
 pub struct ScatterRecord {
     pub color: Color,

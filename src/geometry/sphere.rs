@@ -61,7 +61,7 @@ impl Geometry for Sphere {
     }
 
     fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
-        (p - &self.center).unit()
+        (p - &self.center) / self.radius
     }
 
     fn material(&self) -> Rc<dyn Material> {

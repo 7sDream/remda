@@ -10,7 +10,10 @@ pub struct Lambertian {
 
 impl Lambertian {
     pub fn new(color: Color) -> Self {
-        Self { color, use_hemi: false }
+        Self {
+            color,
+            use_hemi: false,
+        }
     }
 
     pub fn hemi(mut self, value: bool) -> Self {
@@ -20,13 +23,16 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, record: HitRecord) -> Option<super::ScatterRecord> {
+    fn scatter(&self, _ray: &Ray, hit: HitRecord) -> Option<super::ScatterRecord> {
         let dir = if self.use_hemi {
-            Vec3::random_unit_dir(&record.normal)
+            Vec3::random_unit_dir(&hit.normal)
         } else {
-            record.normal + Vec3::random_unit()
+            hit.normal + Vec3::random_unit()
         };
-        let new_ray = Ray::new(record.point, dir);
-        Some(ScatterRecord { color: self.color.clone(), ray: new_ray })
+        let new_ray = Ray::new(hit.point, dir);
+        Some(ScatterRecord {
+            color: self.color.clone(),
+            ray: new_ray,
+        })
     }
 }

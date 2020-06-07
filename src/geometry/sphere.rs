@@ -14,7 +14,12 @@ pub struct Sphere {
 impl Sphere {
     pub fn new<M: Material + 'static>(center: Point3, radius: f64, material: M) -> Self {
         let material = Rc::new(material);
-        Self { center, radius, material, radius_squared: radius * radius }
+        Self {
+            center,
+            radius,
+            material,
+            radius_squared: radius * radius,
+        }
     }
 }
 

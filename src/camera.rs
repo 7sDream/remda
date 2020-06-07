@@ -18,7 +18,13 @@ impl Camera {
         let hor = Vec3::new(VIEWPORT_WIDTH, 0.0, 0.0);
         let ver = Vec3::new(0.0, VIEWPORT_HEIGHT, 0.0);
         let lb = &origin - &hor / 2.0 - &ver / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
-        Self { origin, lb, hor, ver, samples: 1 }
+        Self {
+            origin,
+            lb,
+            hor,
+            ver,
+            samples: 1,
+        }
     }
 
     pub fn set_samples(&mut self, samples: usize) {
@@ -26,7 +32,10 @@ impl Camera {
     }
 
     pub fn ray(&self, u: f64, v: f64) -> Ray {
-        Ray::new(self.origin.clone(), &self.lb + u * &self.hor + v * &self.ver - &self.origin)
+        Ray::new(
+            self.origin.clone(),
+            &self.lb + u * &self.hor + v * &self.ver - &self.origin,
+        )
     }
 
     pub fn painter(&self, width: usize) -> Painter {

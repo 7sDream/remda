@@ -20,18 +20,33 @@ pub struct Image {
 impl Image {
     pub fn new(width: usize, height: usize) -> Self {
         let colors = vec![Color::default(); width * height];
-        Self { width, height, colors }
+        Self {
+            width,
+            height,
+            colors,
+        }
     }
 
     pub fn save<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
         let mut file = File::create(path)?;
-        write!(&mut file, "P3\n{width} {height}\n255\n", width = self.width, height = self.height)?;
+        write!(
+            &mut file,
+            "P3\n{width} {height}\n255\n",
+            width = self.width,
+            height = self.height
+        )?;
 
         for row in 0..self.height {
             for column in 0..self.width {
                 let index = row * self.width + column;
                 let color = &self.colors[index].i();
-                write!(&mut file, "{r} {g} {b}\n", r = color.r, g = color.g, b = color.b)?;
+                write!(
+                    &mut file,
+                    "{r} {g} {b}\n",
+                    r = color.r,
+                    g = color.g,
+                    b = color.b
+                )?;
             }
         }
 
@@ -61,7 +76,11 @@ where
 {
     fn from(container: T) -> Self {
         let colors = container.into();
-        Self { height: 1, width: colors.len(), colors }
+        Self {
+            height: 1,
+            width: colors.len(),
+            colors,
+        }
     }
 }
 
@@ -98,7 +117,11 @@ pub struct Painter {
 
 impl Painter {
     pub fn new(width: usize, height: usize) -> Self {
-        Self { width, height, samples: 1 }
+        Self {
+            width,
+            height,
+            samples: 1,
+        }
     }
 
     pub fn set_samples(mut self, samples: usize) -> Self {
@@ -112,7 +135,12 @@ impl Painter {
         F: FnMut(f64, f64) -> Vec3,
     {
         let mut file = BufWriter::new(File::create(path.as_ref())?);
-        write!(&mut file, "P3\n{width} {height}\n255\n", width = self.width, height = self.height)?;
+        write!(
+            &mut file,
+            "P3\n{width} {height}\n255\n",
+            width = self.width,
+            height = self.height
+        )?;
 
         for row in 0..self.height {
             info!("Scan line remaining: {}", self.height - row);
@@ -127,7 +155,13 @@ impl Painter {
                     .sum();
                 let color = color.into_color(self.samples);
                 let color = color.i();
-                write!(&mut file, "{r} {g} {b}\n", r = color.r, g = color.g, b = color.b)?;
+                write!(
+                    &mut file,
+                    "{r} {g} {b}\n",
+                    r = color.r,
+                    g = color.g,
+                    b = color.b
+                )?;
             }
             // 16KB
             if file.buffer().len() >= 16 << 10 {

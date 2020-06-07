@@ -40,7 +40,11 @@ impl RGBInt {
 
 impl From<&RGBFloat> for RGBInt {
     fn from(c: &RGBFloat) -> RGBInt {
-        RGBInt::new((c.r * 255.0) as u8, (c.g * 255.0) as u8, (c.b * 255.0) as u8)
+        RGBInt::new(
+            (c.r * 255.0) as u8,
+            (c.g * 255.0) as u8,
+            (c.b * 255.0) as u8,
+        )
     }
 }
 

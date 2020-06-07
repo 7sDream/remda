@@ -1,8 +1,9 @@
 use crate::{geometry::HitRecord, prelude::*};
 
 mod lambertian;
+mod metal;
 
-pub use lambertian::Lambertian;
+pub use {lambertian::Lambertian, metal::Metal};
 
 pub struct ScatterRecord {
     pub color: Color,
@@ -10,5 +11,5 @@ pub struct ScatterRecord {
 }
 
 pub trait Material {
-    fn scatter(&self, ray: &Ray, record: HitRecord) -> Option<ScatterRecord>;
+    fn scatter(&self, ray: &Ray, hit: HitRecord) -> Option<ScatterRecord>;
 }

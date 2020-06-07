@@ -15,7 +15,7 @@ mod prelude;
 use {
     camera::Camera,
     geometry::{Geometry, Sphere, World},
-    material::Lambertian,
+    material::{Lambertian, Metal},
     prelude::*,
 };
 
@@ -54,12 +54,22 @@ fn main() {
         .add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
+            Lambertian::new(Color::newf(0.7, 0.3, 0.3)),
         ))
         .add(Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
+            Lambertian::new(Color::newf(0.8, 0.8, 0.0)),
+        ))
+        .add(Sphere::new(
+            Point3::new(1.0, 0.0, -1.0),
+            0.5,
+            Metal::new(Color::newf(0.8, 0.6, 0.2)),
+        ))
+        .add(Sphere::new(
+            Point3::new(-1.0, 0.0, -1.0),
+            0.5,
+            Metal::new(Color::newf(0.8, 0.8, 0.8)),
         ));
 
     camera

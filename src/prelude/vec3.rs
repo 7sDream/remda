@@ -29,7 +29,11 @@ impl Vec3 {
     }
 
     pub fn random_range(r: Range<f64>) -> Self {
-        Self::new(Random::range(r.clone()), Random::range(r.clone()), Random::range(r.clone()))
+        Self::new(
+            Random::range(r.clone()),
+            Random::range(r.clone()),
+            Random::range(r.clone()),
+        )
     }
 
     pub fn random_in_unit_sphere() -> Self {
@@ -224,7 +228,11 @@ impl Mul<&Color> for &Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: &Color) -> Self::Output {
         let rhs = rhs.f();
-        Vec3::new(self.x * rhs.r as f64, self.y * rhs.g as f64, self.z * rhs.b as f64)
+        Vec3::new(
+            self.x * rhs.r as f64,
+            self.y * rhs.g as f64,
+            self.z * rhs.b as f64,
+        )
     }
 }
 

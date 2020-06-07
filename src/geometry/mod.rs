@@ -26,7 +26,13 @@ impl HitRecord {
             normal.reverse();
         }
         let material = object.material();
-        Self { point, normal, material, t, outside }
+        Self {
+            point,
+            normal,
+            material,
+            t,
+            outside,
+        }
     }
 }
 

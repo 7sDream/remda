@@ -89,7 +89,7 @@ impl Vec3 {
 
     pub fn into_color(mut self, sample_count: usize) -> Color {
         self /= sample_count as f64;
-        Color::newf(self.x.sqrt() as f32, self.y.sqrt() as f32, self.z.sqrt() as f32)
+        Color::newf(self.x.sqrt(), self.y.sqrt(), self.z.sqrt())
     }
 }
 

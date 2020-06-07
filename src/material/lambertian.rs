@@ -27,6 +27,6 @@ impl Material for Lambertian {
             record.normal + Vec3::random_unit()
         };
         let new_ray = Ray::new(record.point, dir);
-        Some(ScatterRecord { color: self.color.clone().into(), ray: new_ray })
+        Some(ScatterRecord { color: self.color.clone(), ray: new_ray })
     }
 }

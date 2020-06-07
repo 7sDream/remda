@@ -23,22 +23,22 @@ fn normal_color(normal: &Vec3) -> Vec3 {
     (normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5
 }
 
-fn background(r: &Ray) -> Vec3 {
+fn background(r: &Ray) -> Color {
     let unit = r.direction.unit();
     let t = 0.5 * (unit.y + 1.0);
-    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
+    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
 }
 
-fn ray_color(r: &Ray, world: &World, depth: usize) -> Vec3 {
+fn ray_color(r: &Ray, world: &World, depth: usize) -> Color {
     if depth == 0 {
-        return Vec3::default();
+        return Color::default();
     }
     if let Some(hit) = world.hit(r, 0.001..INFINITY) {
         let material = hit.material.clone();
         if let Some(scattered) = material.scatter(r, hit) {
             return scattered.color * ray_color(&scattered.ray, world, depth - 1);
         }
-        return Vec3::default();
+        return Color::default();
     }
 
     background(r)
@@ -54,20 +54,20 @@ fn main() {
         .add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).hemi(true),
+            Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
         ))
         .add(Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).hemi(true),
+            Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
         ));
 
     camera
         .painter(384)
-        .set_samples(100)
+        .set_samples(256)
         .draw("first.ppm", |u, v| {
             let r = camera.ray(u, v);
-            ray_color(&r, &world, 50)
+            ray_color(&r, &world, 50).into()
         })
         .unwrap();
 }

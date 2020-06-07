@@ -5,7 +5,7 @@ mod lambertian;
 pub use lambertian::Lambertian;
 
 pub struct ScatterRecord {
-    pub color: Vec3,
+    pub color: Color,
     pub ray: Ray,
 }
 

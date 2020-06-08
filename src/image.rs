@@ -109,6 +109,7 @@ impl IndexMut<usize> for Image {
         self.colors.index_mut(index)
     }
 }
+
 pub struct Painter {
     pub width: usize,
     pub height: usize,

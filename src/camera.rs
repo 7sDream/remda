@@ -1,4 +1,9 @@
-use {crate::image::Painter, crate::prelude::*};
+use {
+    crate::geometry::{Geometry, World},
+    crate::image::Painter,
+    crate::prelude::*,
+    std::path::Path,
+};
 
 pub struct Camera {
     origin: Point3,
@@ -13,24 +18,25 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(
-        look_from: Point3, look_at: Point3, vup: Vec3, fov: f64, aspect_ratio: f64, aperture: f64,
-        focus_distance: f64,
+    #[allow(clippy::too_many_arguments, clippy::needless_pass_by_value)] // internal
+    pub(self) fn new(
+        look_from: &Point3, look_at: &Point3, vup: &Vec3, fov: f64, aspect_ratio: f64,
+        aperture: f64, focus_distance: f64,
     ) -> Self {
         let fov = d2r(fov);
         let h = (fov / 2.0).tan();
         let vh = 2.0 * h;
         let vw = vh * aspect_ratio;
 
-        let w = (&look_at - &look_from).unit();
-        let horizontal_unit = w.cross(&vup).unit();
+        let w = (look_at - look_from).unit();
+        let horizontal_unit = w.cross(vup).unit();
         let vertical_unit = horizontal_unit.cross(&w).unit();
 
         let horizontal_full = focus_distance * vw * &horizontal_unit;
         let vertical_full = focus_distance * vh * &vertical_unit;
-        let lb = &look_from - &horizontal_full / 2.0 - &vertical_full / 2.0 + focus_distance * w;
+        let lb = look_from - &horizontal_full / 2.0 - &vertical_full / 2.0 + focus_distance * w;
         Self {
-            origin: look_from,
+            origin: look_from.clone(),
             lb,
             horizontal_full,
             vertical_full,
@@ -39,7 +45,6 @@ impl Camera {
             aspect_ratio,
             aperture,
             focus_distance,
-            samples: 1,
         }
     }
 
@@ -52,15 +57,83 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
-    pub fn painter(&self, height: usize) -> Painter {
-        let width = (height as f64 * self.aspect_ratio) as usize;
-        Painter::new(width, height)
+    pub const fn take_photo<'i, 'w>(&'i self, world: &'w World) -> TakePhotoSettings<'i, 'w> {
+        TakePhotoSettings::new(self, world)
+    }
+}
+
+pub struct TakePhotoSettings<'c, 'w> {
+    camera: &'c Camera,
+    world: &'w World,
+    depth: usize,
+    samples: usize,
+    picture_height: usize,
+}
+
+impl<'c, 'w> TakePhotoSettings<'c, 'w> {
+    pub const fn new(camera: &'c Camera, world: &'w World) -> Self {
+        Self {
+            camera,
+            world,
+            depth: 8,
+            samples: 50,
+            picture_height: 108,
+        }
+    }
+
+    pub const fn samples(mut self, samples: usize) -> Self {
+        self.samples = samples;
+        self
+    }
+
+    pub const fn height(mut self, height: usize) -> Self {
+        self.picture_height = height;
+        self
+    }
+
+    fn background(ray: &Ray) -> Color {
+        let unit = ray.direction.unit();
+        let t = 0.5 * (unit.y + 1.0);
+        Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+    }
+
+    fn ray_color(ray: &Ray, world: &World, depth: usize) -> Color {
+        if depth == 0 {
+            return Color::default();
+        }
+        if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
+            let material = hit.material.clone();
+            if let Some(scattered) = material.scatter(ray, hit) {
+                return scattered.color * Self::ray_color(&scattered.ray, world, depth - 1);
+            }
+            return Color::default();
+        }
+
+        Self::background(ray)
+    }
+
+    pub fn shot<P: AsRef<Path>>(self, path: P) -> std::io::Result<()> {
+        // because picture height/width is always positive and small enough in practice
+        #[allow(
+            clippy::cast_sign_loss,
+            clippy::cast_precision_loss,
+            clippy::cast_possible_truncation
+        )]
+        Painter::new(
+            (self.picture_height as f64 * self.camera.aspect_ratio).round() as usize,
+            self.picture_height,
+        )
+        .set_samples(self.samples)
+        .draw(path, |u, v| -> Vec3 {
+            let ray = self.camera.ray(u, v);
+            Self::ray_color(&ray, self.world, self.depth).into()
+        })
     }
 }
 
 pub struct CameraBuilder {
-    from: Point3,
-    to: Point3,
+    look_from: Point3,
+    look_at: Point3,
     vup: Vec3,
     fov: f64,
     aspect_ratio: f64,
@@ -71,8 +144,8 @@ pub struct CameraBuilder {
 impl Default for CameraBuilder {
     fn default() -> Self {
         Self {
-            from: Point3::default(),
-            to: Point3::new(0.0, 0.0, -1.0),
+            look_from: Point3::default(),
+            look_at: Point3::new(0.0, 0.0, -1.0),
             vup: Vec3::new(0.0, 1.0, 0.0),
             fov: 90.0,
             aspect_ratio: 16.0 / 9.0,
@@ -83,17 +156,17 @@ impl Default for CameraBuilder {
 }
 
 impl CameraBuilder {
-    pub fn look_from(mut self, from: Point3) -> Self {
-        self.from = from;
+    pub const fn look_from(mut self, look_from: Point3) -> Self {
+        self.look_from = look_from;
         self
     }
 
-    pub fn look_at(mut self, to: Point3) -> Self {
-        self.to = to;
+    pub const fn look_at(mut self, look_at: Point3) -> Self {
+        self.look_at = look_at;
         self
     }
 
-    pub fn vup(mut self, vup: Vec3) -> Self {
+    pub const fn vup(mut self, vup: Vec3) -> Self {
         self.vup = vup;
         self
     }
@@ -123,11 +196,19 @@ impl CameraBuilder {
     }
 
     pub fn focus_to_look_at(self) -> Self {
-        let distance = (&self.to - &self.from).length();
+        let distance = (&self.look_at - &self.look_from).length();
         self.focus(distance)
     }
 
     pub fn build(self) -> Camera {
-        Camera::new(self.from, self.to, self.vup, self.fov, self.aspect_ratio, self.aperture, self.focus_distance)
+        Camera::new(
+            &self.look_from,
+            &self.look_at,
+            &self.vup,
+            self.fov,
+            self.aspect_ratio,
+            self.aperture,
+            self.focus_distance,
+        )
     }
 }

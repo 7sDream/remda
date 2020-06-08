@@ -9,14 +9,14 @@ pub struct Lambertian {
 }
 
 impl Lambertian {
-    pub fn new(color: Color) -> Self {
+    pub const fn new(color: Color) -> Self {
         Self {
             color,
             use_hemi: false,
         }
     }
 
-    pub fn hemi(mut self, value: bool) -> Self {
+    pub const fn hemi(mut self, value: bool) -> Self {
         self.use_hemi = value;
         self
     }

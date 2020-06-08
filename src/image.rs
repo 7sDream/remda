@@ -40,9 +40,9 @@ impl Image {
             for column in 0..self.width {
                 let index = row * self.width + column;
                 let color = &self.colors[index].i();
-                write!(
+                writeln!(
                     &mut file,
-                    "{r} {g} {b}\n",
+                    "{r} {g} {b}",
                     r = color.r,
                     g = color.g,
                     b = color.b
@@ -116,7 +116,7 @@ pub struct Painter {
 }
 
 impl Painter {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub const fn new(width: usize, height: usize) -> Self {
         Self {
             width,
             height,
@@ -124,12 +124,19 @@ impl Painter {
         }
     }
 
-    pub fn set_samples(mut self, samples: usize) -> Self {
+    pub const fn set_samples(mut self, samples: usize) -> Self {
         self.samples = samples;
         self
     }
 
-    pub fn draw<P, F>(&self, path: P, mut f: F) -> std::io::Result<()>
+    #[allow(clippy::cast_precision_loss)] // because row and column is small enough in practice
+    fn calculate_uv(&self, row: usize, column: usize) -> (f64, f64) {
+        let u = (column as f64 + Random::normal()) / self.width as f64;
+        let v = ((self.height - 1 - row) as f64 + Random::normal()) / self.height as f64;
+        (u, v)
+    }
+
+    pub fn draw<P, F>(&self, path: P, mut uv_color: F) -> std::io::Result<()>
     where
         P: AsRef<Path>,
         F: FnMut(f64, f64) -> Vec3,
@@ -147,17 +154,15 @@ impl Painter {
             for column in 0..self.width {
                 let color: Vec3 = (0..self.samples)
                     .map(|_| {
-                        let u = (column as f64 + Random::normal()) / self.width as f64;
-                        let v = ((self.height - 1 - row) as f64 + Random::normal())
-                            / self.height as f64;
-                        f(u, v)
+                        let (u, v) = self.calculate_uv(row, column);
+                        uv_color(u, v)
                     })
                     .sum();
                 let color = color.into_color(self.samples);
                 let color = color.i();
-                write!(
+                writeln!(
                     &mut file,
-                    "{r} {g} {b}\n",
+                    "{r} {g} {b}",
                     r = color.r,
                     g = color.g,
                     b = color.b

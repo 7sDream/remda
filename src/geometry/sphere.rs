@@ -24,6 +24,14 @@ impl Sphere {
 }
 
 impl Geometry for Sphere {
+    fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
+        (p - &self.center) / self.radius
+    }
+
+    fn material(&self) -> Rc<dyn Material> {
+        self.material.clone()
+    }
+
     // Ray(t) = O + tD
     // Sphere surface = (X - C)^2 = r^2
     // (O + tD - C)^2 = r^2
@@ -34,10 +42,10 @@ impl Geometry for Sphere {
     // Delta = b^2 - 4ac = 4(DL)^2 - 4 D^2 (L^2 - r2)
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
-    fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord> {
-        let l = &r.origin - &self.center;
-        let half_b = r.direction.dot(&l);
-        let a = r.direction.length_squared();
+    fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord> {
+        let l = &ray.origin - &self.center;
+        let half_b = ray.direction.dot(&l);
+        let a = ray.direction.length_squared();
         let c = l.length_squared() - self.radius_squared;
         let delta = half_b * half_b - a * c;
 
@@ -47,24 +55,16 @@ impl Geometry for Sphere {
 
         let sqrt = delta.sqrt();
 
-        let t = (-half_b - sqrt) / a;
-        if limit.contains(&t) {
-            return Some(HitRecord::new(r, self, t));
+        let t1 = (-half_b - sqrt) / a;
+        if limit.contains(&t1) {
+            return Some(HitRecord::new(ray, self, t1));
         }
 
-        let t = (-half_b + sqrt) / a;
-        if limit.contains(&t) {
-            return Some(HitRecord::new(r, self, t));
+        let t2 = (-half_b + sqrt) / a;
+        if limit.contains(&t2) {
+            return Some(HitRecord::new(ray, self, t2));
         }
 
         None
-    }
-
-    fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
-        (p - &self.center) / self.radius
-    }
-
-    fn material(&self) -> Rc<dyn Material> {
-        self.material.clone()
     }
 }

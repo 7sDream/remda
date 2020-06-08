@@ -1,5 +1,5 @@
 use {
-    super::{Material, ScatterRecord},
+    super::{reflect, Material, ScatterRecord},
     crate::{geometry::HitRecord, prelude::*},
 };
 
@@ -13,7 +13,7 @@ impl ReflectProbabilityCurve for Glass {
     fn reflect_prob(&self, cos_theta: f64, refractive: f64) -> f64 {
         let r0 = (1.0 - refractive) / (1.0 + refractive);
         let r0 = r0 * r0;
-        r0 + (1.0 - r0) * (1.0 - cos_theta).powi(5)
+        (1.0 - r0).mul_add((1.0 - cos_theta).powi(5), r0)
     }
 }
 
@@ -49,21 +49,15 @@ where
             self.outer_refractive
         };
         if refractive * sin_theta > 1.0 {
-            None
-        } else if Random::normal() < self.reflect_curve.reflect_prob(cos_theta, refractive) {
-            None
-        } else {
-            let r_parallel = refractive * (&dir + cos_theta * &hit.normal);
-            let r_perp = -(1.0 - r_parallel.length_squared()).sqrt() * &hit.normal;
-            let r = r_parallel + r_perp;
-            Some(Ray::new(hit.point.clone(), r))
+            return None;
         }
-    }
-
-    fn reflect(&self, ray: &Ray, hit: &HitRecord) -> Ray {
-        let dir = ray.direction.unit();
-        let reflected_dir = &dir - 2.0 * dir.dot(&hit.normal) * &hit.normal;
-        Ray::new(hit.point.clone(), reflected_dir)
+        if Random::normal() < self.reflect_curve.reflect_prob(cos_theta, refractive) {
+            return None;
+        }
+        let r_parallel = refractive * (&dir + cos_theta * &hit.normal);
+        let r_perp = -(1.0 - r_parallel.length_squared()).sqrt() * &hit.normal;
+        let r = r_parallel + r_perp;
+        Some(Ray::new(hit.point.clone(), r))
     }
 }
 
@@ -74,7 +68,7 @@ where
     fn scatter(&self, ray: &Ray, hit: HitRecord) -> Option<ScatterRecord> {
         let refract = self
             .refract(ray, &hit)
-            .unwrap_or_else(|| self.reflect(ray, &hit));
+            .unwrap_or_else(|| reflect(ray, &hit));
         Some(ScatterRecord {
             color: self.color.clone(),
             ray: refract,

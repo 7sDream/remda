@@ -10,35 +10,10 @@ mod prelude;
 
 use {
     camera::CameraBuilder,
-    geometry::{Geometry, Sphere, World},
+    geometry::{Sphere, World},
     material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
 };
-
-fn normal_color(normal: &Vec3) -> Vec3 {
-    (normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5
-}
-
-fn background(r: &Ray) -> Color {
-    let unit = r.direction.unit();
-    let t = 0.5 * (unit.y + 1.0);
-    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
-}
-
-fn ray_color(r: &Ray, world: &World, depth: usize) -> Color {
-    if depth == 0 {
-        return Color::default();
-    }
-    if let Some(hit) = world.hit(r, 0.001..INFINITY) {
-        let material = hit.material.clone();
-        if let Some(scattered) = material.scatter(r, hit) {
-            return scattered.color * ray_color(&scattered.ray, world, depth - 1);
-        }
-        return Color::default();
-    }
-
-    background(r)
-}
 
 fn add_small_balls(world: &mut World) {
     let small_ball_radius = 0.2;
@@ -103,8 +78,9 @@ fn make_world() -> World {
 
     // Ground
     world.add(Sphere::new(
-        Point3::new(0.0, -1000.0, 0.0), 1000.0,
-        Lambertian::new(Color::newf(0.5, 0.5, 0.5))
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
     ));
 
     add_small_balls(&mut world);
@@ -113,7 +89,6 @@ fn make_world() -> World {
     world
 }
 
-#[allow(unused_variables)]
 fn main() {
     env_logger::init();
 
@@ -128,11 +103,9 @@ fn main() {
     let world = make_world();
 
     camera
-        .painter(108)
-        .set_samples(256)
-        .draw("rendered.ppm", |u, v| {
-            let r = camera.ray(u, v);
-            ray_color(&r, &world, 50).into()
-        })
+        .take_photo(&world)
+        .height(108)
+        .samples(256)
+        .shot("rendered.ppm")
         .unwrap();
 }

@@ -18,3 +18,9 @@ pub struct ScatterRecord {
 pub trait Material {
     fn scatter(&self, ray: &Ray, hit: HitRecord) -> Option<ScatterRecord>;
 }
+
+pub(crate) fn reflect(ray: &Ray, hit: &HitRecord) -> Ray {
+    let dir = ray.direction.unit();
+    let reflected_dir = &dir - 2.0 * dir.dot(&hit.normal) * &hit.normal;
+    Ray::new(hit.point.clone(), reflected_dir)
+}

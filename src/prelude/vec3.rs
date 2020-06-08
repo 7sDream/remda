@@ -20,7 +20,7 @@ pub struct Vec3 {
 pub type Point3 = Vec3;
 
 impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
@@ -32,20 +32,20 @@ impl Vec3 {
         Self::new(
             Random::range(r.clone()),
             Random::range(r.clone()),
-            Random::range(r.clone()),
+            Random::range(r),
         )
     }
 
     pub fn random_in_unit_sphere() -> Self {
         loop {
-            let p = Vec3::random_in_unit_box();
+            let p = Self::random_in_unit_box();
             if p.length_squared() < 1.0 {
                 return p;
             }
         }
     }
 
-    pub fn random_in_unit_hemisphere(dir: &Vec3) -> Self {
+    pub fn random_in_unit_hemisphere(dir: &Self) -> Self {
         let u = Self::random_in_unit_sphere();
         if u.dot(dir) > 0.0 {
             u
@@ -61,7 +61,7 @@ impl Vec3 {
         Self::new(r * a.cos(), r * a.sin(), z)
     }
 
-    pub fn random_unit_dir(dir: &Vec3) -> Self {
+    pub fn random_unit_dir(dir: &Self) -> Self {
         let u = Self::random_unit();
         if u.dot(dir) > 0.0 {
             u
@@ -72,7 +72,7 @@ impl Vec3 {
 
     pub fn random_unit_disk() -> Self {
         loop {
-            let p = Vec3::new(Random::range(-1.0..1.0), Random::range(-1.0..1.0), 0.0);
+            let p = Self::new(Random::range(-1.0..1.0), Random::range(-1.0..1.0), 0.0);
             if p.length_squared() < 1.0 {
                 return p;
             }
@@ -80,7 +80,8 @@ impl Vec3 {
     }
 
     pub fn length_squared(&self) -> f64 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.z
+            .mul_add(self.z, self.x.mul_add(self.x, self.y * self.y))
     }
 
     pub fn length(&self) -> f64 {
@@ -94,7 +95,7 @@ impl Vec3 {
     }
 
     pub fn dot(&self, rhs: &Self) -> f64 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+        self.z.mul_add(rhs.z, self.x.mul_add(rhs.x, self.y * rhs.y))
     }
 
     pub fn cross(&self, rhs: &Self) -> Self {
@@ -109,6 +110,7 @@ impl Vec3 {
         self / self.length()
     }
 
+    #[allow(clippy::cast_precision_loss)] // sample count is small enough in practice
     pub fn into_color(mut self, sample_count: usize) -> Color {
         self /= sample_count as f64;
         Color::newf(self.x.sqrt(), self.y.sqrt(), self.z.sqrt())
@@ -152,9 +154,9 @@ impl Neg for &Vec3 {
 }
 
 impl Neg for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn neg(self) -> Self::Output {
-        -&self
+        (&self).neg()
     }
 }
 
@@ -201,14 +203,14 @@ impl Sub<Vec3> for &Vec3 {
 }
 
 impl Sub<Self> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
         &self - &rhs
     }
 }
 
 impl Sub<&Self> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn sub(self, rhs: &Self) -> Self::Output {
         &self - rhs
     }
@@ -229,14 +231,14 @@ impl Mul<Vec3> for &Vec3 {
 }
 
 impl Mul<Self> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn mul(self, rhs: Self) -> Self::Output {
         &self * &rhs
     }
 }
 
 impl Mul<&Self> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn mul(self, rhs: &Self) -> Self::Output {
         &self * rhs
     }
@@ -262,14 +264,14 @@ impl Mul<Color> for &Vec3 {
 }
 
 impl Mul<Color> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn mul(self, rhs: Color) -> Self::Output {
         &self * &rhs
     }
 }
 
 impl Mul<&Color> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn mul(self, rhs: &Color) -> Self::Output {
         &self * rhs
     }
@@ -339,7 +341,7 @@ impl Div<f64> for &Vec3 {
 }
 
 impl Div<f64> for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
     fn div(self, rhs: f64) -> Self::Output {
         self * (1.0 / rhs)
     }
@@ -411,7 +413,7 @@ impl DivAssign<f64> for Vec3 {
 
 impl Sum for Vec3 {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Vec3::default(), |acc, val| acc + val)
+        iter.fold(Self::default(), |acc, val| acc + val)
     }
 }
 

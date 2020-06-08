@@ -14,7 +14,7 @@ $ env RUST_LOG=info cargo run --release
 
 Wait about 1 minute, you will get a `rendered.ppm` in current dir, that's your result.
 
-If you want a bigger and clear image, adjust `painter()` and `set_samples()` argument in `main.rs` and re-run.
+If you want a bigger and clear image, adjust `height()` and `samples()` argument in `main.rs` and re-run.
 
 The screenshot above(1920x1080, 512 samples) takes about 4 hours to render, be patient;
 

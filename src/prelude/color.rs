@@ -39,8 +39,10 @@ impl RGBInt {
 }
 
 impl From<&RGBFloat> for RGBInt {
-    fn from(c: &RGBFloat) -> RGBInt {
-        RGBInt::new(
+    fn from(c: &RGBFloat) -> Self {
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+        // because RGBFloat r g b should be in [0..1]
+        Self::new(
             (c.r * 255.0) as u8,
             (c.g * 255.0) as u8,
             (c.b * 255.0) as u8,
@@ -51,7 +53,7 @@ impl From<&RGBFloat> for RGBInt {
 impl From<&RGBInt> for RGBFloat {
     fn from(c: &RGBInt) -> Self {
         let s = 1.0 / 255.0;
-        RGBFloat::new(c.r as f64 * s, c.g as f64 * s, c.b as f64 * s)
+        Self::new(f64::from(c.r) * s, f64::from(c.g) * s, f64::from(c.b) * s)
     }
 }
 
@@ -78,24 +80,24 @@ impl Color {
 
     pub fn i(&self) -> Cow<'_, RGBInt> {
         match self {
-            Color::RGBF(c) => Cow::Owned(c.into()),
-            Color::RGBI(c) => Cow::Borrowed(c),
+            Self::RGBF(c) => Cow::Owned(c.into()),
+            Self::RGBI(c) => Cow::Borrowed(c),
         }
     }
 
     pub fn f(&self) -> Cow<'_, RGBFloat> {
         match self {
-            Color::RGBF(c) => Cow::Borrowed(c),
-            Color::RGBI(c) => Cow::Owned(c.into()),
+            Self::RGBF(c) => Cow::Borrowed(c),
+            Self::RGBI(c) => Cow::Owned(c.into()),
         }
     }
 
-    pub fn gradient(&self, rhs: &Color, slide: f64) -> Self {
+    pub fn gradient(&self, rhs: &Self, slide: f64) -> Self {
         let a = (1.0 - slide) * self;
         let b = slide * rhs;
         let c1 = a.f();
         let c2 = b.f();
-        Color::newf(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b)
+        Self::newf(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b)
     }
 }
 
@@ -110,7 +112,7 @@ impl Mul<&Color> for &Color {
     fn mul(self, rhs: &Color) -> Self::Output {
         let c1 = self.f();
         let c2 = rhs.f();
-        return Color::newf(c1.r * c2.r, c1.g * c2.g, c1.b * c2.b);
+        Color::newf(c1.r * c2.r, c1.g * c2.g, c1.b * c2.b)
     }
 }
 
@@ -122,15 +124,15 @@ impl Mul<Color> for &Color {
 }
 
 impl Mul<&Color> for Color {
-    type Output = Color;
-    fn mul(self, rhs: &Color) -> Self::Output {
+    type Output = Self;
+    fn mul(self, rhs: &Self) -> Self::Output {
         &self * rhs
     }
 }
 
 impl Mul<Color> for Color {
-    type Output = Color;
-    fn mul(self, rhs: Color) -> Self::Output {
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self::Output {
         &self * &rhs
     }
 }
@@ -148,7 +150,7 @@ impl Mul<f64> for &Color {
 }
 
 impl Mul<f64> for Color {
-    type Output = Color;
+    type Output = Self;
     fn mul(self, rhs: f64) -> Self::Output {
         &self * rhs
     }

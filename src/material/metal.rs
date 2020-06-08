@@ -9,7 +9,7 @@ pub struct Metal {
 }
 
 impl Metal {
-    pub fn new(color: Color) -> Self {
+    pub const fn new(color: Color) -> Self {
         Self { color, fuzz: 0.0 }
     }
 

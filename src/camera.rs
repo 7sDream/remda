@@ -13,8 +13,6 @@ pub struct Camera {
     samples: usize,
 }
 
-const FOCAL_LENGTH: f64 = 1.0;
-
 impl Camera {
     pub fn new(
         look_from: Point3, look_at: Point3, vup: Vec3, fov: f64, aspect_ratio: f64, aperture: f64,
@@ -62,5 +60,79 @@ impl Camera {
     pub fn painter(&self, height: usize) -> Painter {
         let width = (height as f64 * self.aspect_ratio) as usize;
         Painter::new(width, height)
+    }
+}
+
+pub struct CameraBuilder {
+    from: Point3,
+    to: Point3,
+    vup: Vec3,
+    fov: f64,
+    aspect_ratio: f64,
+    aperture: f64,
+    focus_distance: f64,
+}
+
+impl Default for CameraBuilder {
+    fn default() -> Self {
+        Self {
+            from: Point3::default(),
+            to: Point3::new(0.0, 0.0, -1.0),
+            vup: Vec3::new(0.0, 1.0, 0.0),
+            fov: 90.0,
+            aspect_ratio: 16.0 / 9.0,
+            aperture: 0.0,
+            focus_distance: 1.0,
+        }
+    }
+}
+
+impl CameraBuilder {
+    pub fn look_from(mut self, from: Point3) -> Self {
+        self.from = from;
+        self
+    }
+
+    pub fn look_at(mut self, to: Point3) -> Self {
+        self.to = to;
+        self
+    }
+
+    pub fn vup(mut self, vup: Vec3) -> Self {
+        self.vup = vup;
+        self
+    }
+
+    pub fn fov(mut self, fov: f64) -> Self {
+        debug_assert!(0.0 < fov && fov <= 180.0, "fov = {}", fov);
+        self.fov = fov;
+        self
+    }
+
+    pub fn aspect_ratio(mut self, aspect_ratio: f64) -> Self {
+        debug_assert!(aspect_ratio > 0.0, "aspect_ratio = {}", aspect_ratio);
+        self.aspect_ratio = aspect_ratio;
+        self
+    }
+
+    pub fn aperture(mut self, aperture: f64) -> Self {
+        debug_assert!(aperture >= 0.0, "aperture = {}", aperture);
+        self.aperture = aperture;
+        self
+    }
+
+    pub fn focus(mut self, distance: f64) -> Self {
+        debug_assert!(distance >= 0.0, "distance = {}", distance);
+        self.focus_distance = distance;
+        self
+    }
+
+    pub fn focus_to_look_at(self) -> Self {
+        let distance = (&self.to - &self.from).length();
+        self.focus(distance)
+    }
+
+    pub fn build(self) -> Camera {
+        Camera::new(self.from, self.to, self.vup, self.fov, self.aspect_ratio, self.aperture, self.focus_distance)
     }
 }

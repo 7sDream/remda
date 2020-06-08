@@ -1,10 +1,7 @@
-#![deny(warnings)]
-#![deny(clippy::all, clippy::pedantic, clippy::nursery)]
-#![deny(missing_debug_implementations, rust_2018_idioms)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(dead_code)]
 
-use env_logger;
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+#![warn(missing_debug_implementations, rust_2018_idioms)]
+#![allow(clippy::module_name_repetitions)]
 
 mod camera;
 mod geometry;
@@ -13,7 +10,7 @@ mod material;
 mod prelude;
 
 use {
-    camera::Camera,
+    camera::CameraBuilder,
     geometry::{Geometry, Sphere, World},
     material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
@@ -44,23 +41,19 @@ fn ray_color(r: &Ray, world: &World, depth: usize) -> Color {
     background(r)
 }
 
-fn make_world() -> World {
-    let ground = Lambertian::new(Color::newf(0.5, 0.5, 0.5));
-    let mut world = World::new();
-    world.add(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground));
-
+fn add_small_balls(world: &mut World) {
     let small_ball_radius = 0.2;
-    let elusion = Point3::new(4.0, 0.2, 0.0);
+    let avoid = Point3::new(4.0, 0.2, 0.0);
     for a in -11..11 {
         for b in -11..11 {
             let mat = Random::normal();
             let center = Point3::new(
-                a as f64 + 0.9 * Random::normal(),
+                0.9_f64.mul_add(Random::normal(), f64::from(a)),
                 0.2,
-                b as f64 + 0.9 * Random::normal(),
+                0.9_f64.mul_add(Random::normal(), f64::from(b)),
             );
 
-            if (&center - &elusion).length() > 0.9 {
+            if (&center - &avoid).length() > 0.9 {
                 if mat < 0.8 {
                     let color = Color::newf(Random::normal(), Random::normal(), Random::normal());
                     let material = Lambertian::new(color);
@@ -84,7 +77,9 @@ fn make_world() -> World {
             }
         }
     }
+}
 
+fn add_big_balls(world: &mut World) {
     world.add(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
@@ -102,6 +97,19 @@ fn make_world() -> World {
         1.0,
         Metal::new(Color::newf(0.7, 0.6, 0.5)),
     ));
+}
+
+fn make_world() -> World {
+    let mut world = World::new();
+
+    // Ground
+    world.add(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0), 1000.0,
+        Lambertian::new(Color::newf(0.5, 0.5, 0.5))
+    ));
+
+    add_small_balls(&mut world);
+    add_big_balls(&mut world);
 
     world
 }
@@ -109,18 +117,20 @@ fn make_world() -> World {
 #[allow(unused_variables)]
 fn main() {
     env_logger::init();
-    let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_to = Point3::new(0.0, 0.0, 0.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
-    let fov = 20.0;
-    let aspect_ratio = 16.0 / 9.0;
-    let aperture = 0.1;
-    let focus = 10.0;
-    let camera = Camera::new(look_from, look_to, vup, fov, aspect_ratio, aperture, focus);
+
+    let camera = CameraBuilder::default()
+        .look_from(Point3::new(13.0, 2.0, 3.0))
+        .look_at(Point3::new(0.0, 0.0, 0.0))
+        .fov(20.0)
+        .aperture(0.1)
+        .focus(10.0)
+        .build();
+
     let world = make_world();
+
     camera
-        .painter(1080)
-        .set_samples(512)
+        .painter(100)
+        .set_samples(50)
         .draw("first.ppm", |u, v| {
             let r = camera.ray(u, v);
             ray_color(&r, &world, 50).into()

@@ -10,7 +10,6 @@ pub struct Camera {
     aspect_ratio: f64,
     aperture: f64,
     focus_distance: f64,
-    samples: usize,
 }
 
 impl Camera {
@@ -42,10 +41,6 @@ impl Camera {
             focus_distance,
             samples: 1,
         }
-    }
-
-    pub fn set_samples(&mut self, samples: usize) {
-        self.samples = samples;
     }
 
     pub fn ray(&self, u: f64, v: f64) -> Ray {

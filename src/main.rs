@@ -1,7 +1,6 @@
-
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-#![warn(missing_debug_implementations, rust_2018_idioms)]
-#![allow(clippy::module_name_repetitions)]
+#![deny(clippy::all, clippy::pedantic, clippy::nursery)]
+#![deny(missing_debug_implementations, rust_2018_idioms)]
+#![allow(clippy::module_name_repetitions, dead_code)]
 
 mod camera;
 mod geometry;
@@ -129,9 +128,9 @@ fn main() {
     let world = make_world();
 
     camera
-        .painter(100)
-        .set_samples(50)
-        .draw("first.ppm", |u, v| {
+        .painter(108)
+        .set_samples(256)
+        .draw("rendered.ppm", |u, v| {
             let r = camera.ray(u, v);
             ray_color(&r, &world, 50).into()
         })

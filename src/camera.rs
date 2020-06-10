@@ -107,7 +107,7 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
             return Color::default();
         }
         if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
-            let material = hit.material.clone();
+            let material = hit.material;
             if let Some(scattered) = material.scatter(ray, hit) {
                 return scattered.color * Self::ray_color(&scattered.ray, world, depth - 1);
             }
@@ -119,6 +119,7 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
 
     /// # Errors
     /// When open or save to file failed
+    #[allow(clippy::needless_pass_by_value)] // Directly used public API, add & will make it harder to use
     pub fn shot<P: AsRef<Path>>(&self, path: Option<P>) -> std::io::Result<()> {
         // because picture height/width is always positive and small enough in practice
         #[allow(
@@ -131,7 +132,7 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
             self.picture_height,
         )
         .set_samples(self.samples)
-        .draw(path, |u, v| -> Vec3 {
+        .draw(&path, |u, v| -> Vec3 {
             let ray = self.camera.ray(u, v);
             Self::ray_color(&ray, self.world, self.depth).into()
         })

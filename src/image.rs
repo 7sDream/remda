@@ -1,6 +1,6 @@
 use {
     crate::prelude::*,
-    log::info,
+    log::{error, info},
     rayon::prelude::*,
     std::{
         cmp::Reverse,
@@ -154,7 +154,7 @@ impl Painter {
     }
 
     fn write_file(
-        &self, path: Option<&Path>, rx: Receiver<(usize, String)>,
+        &self, path: &Option<&Path>, rx: Receiver<(usize, String)>,
     ) -> std::io::Result<()> {
         let mut file: BufWriter<Box<dyn Write>> = if let Some(path) = path {
             BufWriter::new(Box::new(File::create(&path)?))
@@ -200,7 +200,7 @@ impl Painter {
     /// # Errors
     ///
     /// When open or save to file failed
-    pub fn draw<P, F>(&self, path: Option<P>, uv_color: F) -> std::io::Result<()>
+    pub fn draw<P, F>(&self, path: &Option<P>, uv_color: F) -> std::io::Result<()>
     where
         P: AsRef<Path>,
         F: Fn(f64, f64) -> Vec3 + Send + Sync,
@@ -218,7 +218,11 @@ impl Painter {
         rayon::ThreadPoolBuilder::default()
             .num_threads(num_cpus::get() + 1)
             .build_global()
-            .unwrap();
+            .map_err(|err| {
+                error!("{}", err);
+                std::io::Error::new(std::io::ErrorKind::Other, err)
+            })?;
+
         info!("Worker Thread Count: {}", rayon::current_num_threads());
 
         rayon::scope(|s| {
@@ -227,7 +231,7 @@ impl Painter {
                     .into_par_iter()
                     .for_each_with(tx, |sender, row| {
                         (0..self.width).for_each(|column| {
-                            if cancel.load(std::sync::atomic::Ordering::Relaxed) {
+                            if cancel.load(std::sync::atomic::Ordering::SeqCst) {
                                 return;
                             }
                             let color: Vec3 = (0..self.samples)
@@ -239,19 +243,19 @@ impl Painter {
                             let color = color.into_color(self.samples);
                             let color = color.i();
                             let idx = row * self.width + column;
-                            sender
-                                .send((
-                                    idx,
-                                    format!("{r} {g} {b}", r = color.r, g = color.g, b = color.b),
-                                ))
-                                .unwrap();
+                            // If rx is dropped, means write_file method failed.
+                            // Pixel data can be dropped safely, so we don't need unwrap here
+                            let _ = sender.send((
+                                idx,
+                                format!("{r} {g} {b}", r = color.r, g = color.g, b = color.b),
+                            ));
                         });
                     });
             });
             s.spawn(|_| {
-                result = self.write_file(path, rx);
+                result = self.write_file(&path, rx);
                 if result.is_err() {
-                    cancel.store(true, Ordering::Relaxed);
+                    cancel.store(true, Ordering::SeqCst);
                 }
             })
         });

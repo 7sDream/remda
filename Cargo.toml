@@ -4,7 +4,19 @@ version = "0.1.0"
 authors = ["7sDream <i@7sdre.am>"]
 edition = "2018"
 
+[lib]
+name = "remda"
+path = "src/lib.rs"
+
+[[bin]]
+name = "remda"
+path = "src/main.rs"
+
 [dependencies]
 env_logger = "0.7"
 log = "0.4"
 rand = "0.7"
+
+[[bench]]
+name = "render"
+harness = false

@@ -7,6 +7,7 @@ pub trait ReflectProbabilityCurve {
     fn reflect_prob(&self, cos_theta: f64, refractive: f64) -> f64;
 }
 
+#[derive(Debug)]
 pub struct Glass {}
 
 impl ReflectProbabilityCurve for Glass {
@@ -17,6 +18,7 @@ impl ReflectProbabilityCurve for Glass {
     }
 }
 
+#[derive(Debug)]
 pub struct Dielectric<R> {
     color: Color,
     enter_refractive: f64,

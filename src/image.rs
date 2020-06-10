@@ -1,4 +1,5 @@
 use {
+    crate::prelude::*,
     log::info,
     std::{
         fs::File,
@@ -9,8 +10,7 @@ use {
     },
 };
 
-use crate::prelude::*;
-
+#[derive(Debug)]
 pub struct Image {
     width: usize,
     height: usize,
@@ -18,6 +18,7 @@ pub struct Image {
 }
 
 impl Image {
+    #[must_use]
     pub fn new(width: usize, height: usize) -> Self {
         let colors = vec![Color::default(); width * height];
         Self {
@@ -27,6 +28,8 @@ impl Image {
         }
     }
 
+    /// # Errors
+    /// When open or write to file failed
     pub fn save<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
         let mut file = File::create(path)?;
         write!(
@@ -53,6 +56,9 @@ impl Image {
         Ok(())
     }
 
+    /// # Errors
+    ///
+    /// When image pixel count is not divisible by new width
     pub fn reshape(&mut self, width: usize) -> Result<(), ()> {
         if self.colors.len() % width == 0 {
             self.width = width;
@@ -110,6 +116,7 @@ impl IndexMut<usize> for Image {
     }
 }
 
+#[derive(Debug)]
 pub struct Painter {
     pub width: usize,
     pub height: usize,
@@ -117,6 +124,7 @@ pub struct Painter {
 }
 
 impl Painter {
+    #[must_use]
     pub const fn new(width: usize, height: usize) -> Self {
         Self {
             width,
@@ -125,6 +133,7 @@ impl Painter {
         }
     }
 
+    #[must_use]
     pub const fn set_samples(mut self, samples: usize) -> Self {
         self.samples = samples;
         self
@@ -137,12 +146,19 @@ impl Painter {
         (u, v)
     }
 
-    pub fn draw<P, F>(&self, path: P, mut uv_color: F) -> std::io::Result<()>
+    /// # Errors
+    ///
+    /// When open or save to file failed
+    pub fn draw<P, F>(&self, path: Option<P>, mut uv_color: F) -> std::io::Result<()>
     where
         P: AsRef<Path>,
         F: FnMut(f64, f64) -> Vec3,
     {
-        let mut file = BufWriter::new(File::create(path.as_ref())?);
+        let mut file: BufWriter<Box<dyn Write>> = if let Some(path) = path {
+            BufWriter::new(Box::new(File::create(path.as_ref())?))
+        } else {
+            BufWriter::new(Box::new(std::io::sink()))
+        };
         write!(
             &mut file,
             "P3\n{width} {height}\n255\n",

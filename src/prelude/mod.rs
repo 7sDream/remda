@@ -1,46 +1,46 @@
 mod color;
 mod ray;
 mod vec3;
+mod random;
 
-use {
-    rand::Rng,
-    std::ops::{Range, RangeInclusive},
-};
+use std::ops::{RangeBounds, Bound};
 
 pub use {
     color::Color,
     ray::Ray,
     vec3::{Point3, Vec3},
+    random::{Random, SeedRandom},
+    std::f64::{
+        consts::PI,
+        INFINITY,
+    },
 };
 
-pub use std::f64::consts::PI;
-pub use std::f64::INFINITY;
-
+#[must_use]
 pub fn d2r(d: f64) -> f64 {
     d * PI / 180.0
 }
 
+#[must_use]
 pub fn r2d(r: f64) -> f64 {
     r / PI * 180.0
 }
 
-pub fn clamp(x: f64, range: RangeInclusive<f64>) -> f64 {
-    if range.start().gt(&x) {
-        *range.start()
-    } else if range.end().lt(&x) {
-        *range.end()
+#[must_use]
+pub fn clamp<R: RangeBounds<f64>>(x: f64, range: R) -> f64 {
+    let start = match range.start_bound() {
+        Bound::Included(&x) | Bound::Excluded(&x) => x,
+        _ => std::f64::NEG_INFINITY,
+    };
+    let end = match range.end_bound() {
+        Bound::Included(&x) | Bound::Excluded(&x) => x,
+        _ => std::f64::INFINITY,
+    };
+    if start > x {
+        start
+    } else if x > end {
+        end
     } else {
         x
-    }
-}
-
-pub struct Random();
-
-impl Random {
-    pub fn normal() -> f64 {
-        rand::thread_rng().gen_range(0.0, 1.0)
-    }
-    pub fn range(r: Range<f64>) -> f64 {
-        rand::thread_rng().gen_range(r.start, r.end)
     }
 }

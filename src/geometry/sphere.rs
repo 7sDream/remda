@@ -1,7 +1,11 @@
 use {
     super::{Geometry, HitRecord},
     crate::{material::Material, prelude::*},
-    std::{ops::Range, rc::Rc},
+    std::{
+        fmt::{Debug, Formatter},
+        ops::Range,
+        rc::Rc,
+    },
 };
 
 pub struct Sphere {
@@ -9,6 +13,15 @@ pub struct Sphere {
     radius: f64,
     material: Rc<dyn Material>,
     radius_squared: f64,
+}
+
+impl Debug for Sphere {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "Sphere {{ center: {:?}, radius: {} }}",
+            self.center, self.radius
+        ))
+    }
 }
 
 impl Sphere {

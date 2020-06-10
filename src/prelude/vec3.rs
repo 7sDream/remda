@@ -20,14 +20,17 @@ pub struct Vec3 {
 pub type Point3 = Vec3;
 
 impl Vec3 {
+    #[must_use]
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
+    #[must_use]
     pub fn random_in_unit_box() -> Self {
         Self::new(Random::normal(), Random::normal(), Random::normal())
     }
 
+    #[must_use]
     pub fn random_range(r: Range<f64>) -> Self {
         Self::new(
             Random::range(r.clone()),
@@ -36,6 +39,7 @@ impl Vec3 {
         )
     }
 
+    #[must_use]
     pub fn random_in_unit_sphere() -> Self {
         loop {
             let p = Self::random_in_unit_box();
@@ -45,6 +49,7 @@ impl Vec3 {
         }
     }
 
+    #[must_use]
     pub fn random_in_unit_hemisphere(dir: &Self) -> Self {
         let u = Self::random_in_unit_sphere();
         if u.dot(dir) > 0.0 {
@@ -54,6 +59,7 @@ impl Vec3 {
         }
     }
 
+    #[must_use]
     pub fn random_unit() -> Self {
         let a = Random::range(0.0..(2.0 * PI));
         let z = Random::range(-1.0..1.0);
@@ -61,6 +67,7 @@ impl Vec3 {
         Self::new(r * a.cos(), r * a.sin(), z)
     }
 
+    #[must_use]
     pub fn random_unit_dir(dir: &Self) -> Self {
         let u = Self::random_unit();
         if u.dot(dir) > 0.0 {
@@ -70,6 +77,7 @@ impl Vec3 {
         }
     }
 
+    #[must_use]
     pub fn random_unit_disk() -> Self {
         loop {
             let p = Self::new(Random::range(-1.0..1.0), Random::range(-1.0..1.0), 0.0);
@@ -79,11 +87,13 @@ impl Vec3 {
         }
     }
 
+    #[must_use]
     pub fn length_squared(&self) -> f64 {
         self.z
             .mul_add(self.z, self.x.mul_add(self.x, self.y * self.y))
     }
 
+    #[must_use]
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
@@ -94,10 +104,12 @@ impl Vec3 {
         self.z = -self.z;
     }
 
+    #[must_use]
     pub fn dot(&self, rhs: &Self) -> f64 {
         self.z.mul_add(rhs.z, self.x.mul_add(rhs.x, self.y * rhs.y))
     }
 
+    #[must_use]
     pub fn cross(&self, rhs: &Self) -> Self {
         Self::new(
             self.y * rhs.z - self.z * rhs.y,
@@ -106,11 +118,13 @@ impl Vec3 {
         )
     }
 
+    #[must_use]
     pub fn unit(&self) -> Self {
         self / self.length()
     }
 
     #[allow(clippy::cast_precision_loss)] // sample count is small enough in practice
+    #[must_use]
     pub fn into_color(mut self, sample_count: usize) -> Color {
         self /= sample_count as f64;
         Color::newf(self.x.sqrt(), self.y.sqrt(), self.z.sqrt())

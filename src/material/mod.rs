@@ -10,6 +10,7 @@ pub use {
     metal::Metal,
 };
 
+#[derive(Debug)]
 pub struct ScatterRecord {
     pub color: Color,
     pub ray: Ray,

@@ -70,14 +70,17 @@ impl Default for Color {
 }
 
 impl Color {
+    #[must_use]
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self::RGBI(RGBInt::new(r, g, b))
     }
 
+    #[must_use]
     pub fn newf(r: f64, g: f64, b: f64) -> Self {
         Self::RGBF(RGBFloat::new(r, g, b))
     }
 
+    #[must_use]
     pub fn i(&self) -> Cow<'_, RGBInt> {
         match self {
             Self::RGBF(c) => Cow::Owned(c.into()),
@@ -85,6 +88,7 @@ impl Color {
         }
     }
 
+    #[must_use]
     pub fn f(&self) -> Cow<'_, RGBFloat> {
         match self {
             Self::RGBF(c) => Cow::Borrowed(c),
@@ -92,6 +96,7 @@ impl Color {
         }
     }
 
+    #[must_use]
     pub fn gradient(&self, rhs: &Self, slide: f64) -> Self {
         let a = (1.0 - slide) * self;
         let b = slide * rhs;
@@ -100,12 +105,6 @@ impl Color {
         Self::newf(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b)
     }
 }
-
-pub static BLACK: Color = Color::new(0, 0, 0);
-pub static WHITE: Color = Color::new(255, 255, 255);
-pub static RED: Color = Color::new(255, 0, 0);
-pub static GREEN: Color = Color::new(0, 255, 0);
-pub static BLUE: Color = Color::new(0, 0, 255);
 
 impl Mul<&Color> for &Color {
     type Output = Color;

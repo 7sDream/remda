@@ -3,16 +3,19 @@ use {
     crate::{geometry::HitRecord, prelude::*},
 };
 
+#[derive(Debug)]
 pub struct Metal {
     color: Color,
     fuzz: f64,
 }
 
 impl Metal {
+    #[must_use]
     pub const fn new(color: Color) -> Self {
         Self { color, fuzz: 0.0 }
     }
 
+    #[must_use]
     pub fn fuzz(mut self, fuzz: f64) -> Self {
         self.fuzz = clamp(fuzz.abs(), 0.0..=1.0);
         self

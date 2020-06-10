@@ -3,12 +3,14 @@ use {
     crate::{geometry::HitRecord, prelude::*},
 };
 
+#[derive(Debug)]
 pub struct Lambertian {
     color: Color,
     use_hemi: bool,
 }
 
 impl Lambertian {
+    #[must_use]
     pub const fn new(color: Color) -> Self {
         Self {
             color,
@@ -16,6 +18,7 @@ impl Lambertian {
         }
     }
 
+    #[must_use]
     pub const fn hemi(mut self, value: bool) -> Self {
         self.use_hemi = value;
         self

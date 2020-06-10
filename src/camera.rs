@@ -5,6 +5,7 @@ use {
     std::path::Path,
 };
 
+#[derive(Debug)]
 pub struct Camera {
     origin: Point3,
     lb: Point3,
@@ -14,7 +15,6 @@ pub struct Camera {
     vertical_unit: Vec3,
     aspect_ratio: f64,
     aperture: f64,
-    focus_distance: f64,
 }
 
 impl Camera {
@@ -44,10 +44,10 @@ impl Camera {
             vertical_unit,
             aspect_ratio,
             aperture,
-            focus_distance,
         }
     }
 
+    #[must_use]
     pub fn ray(&self, u: f64, v: f64) -> Ray {
         let rd = self.aperture / 2.0 * Vec3::random_unit_disk();
         let offset = &self.horizontal_unit * rd.x + &self.vertical_unit * rd.y;
@@ -57,11 +57,13 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
+    #[must_use]
     pub const fn take_photo<'i, 'w>(&'i self, world: &'w World) -> TakePhotoSettings<'i, 'w> {
         TakePhotoSettings::new(self, world)
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct TakePhotoSettings<'c, 'w> {
     camera: &'c Camera,
     world: &'w World,
@@ -71,6 +73,7 @@ pub struct TakePhotoSettings<'c, 'w> {
 }
 
 impl<'c, 'w> TakePhotoSettings<'c, 'w> {
+    #[must_use]
     pub const fn new(camera: &'c Camera, world: &'w World) -> Self {
         Self {
             camera,
@@ -81,11 +84,13 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
         }
     }
 
+    #[must_use]
     pub const fn samples(mut self, samples: usize) -> Self {
         self.samples = samples;
         self
     }
 
+    #[must_use]
     pub const fn height(mut self, height: usize) -> Self {
         self.picture_height = height;
         self
@@ -112,7 +117,9 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
         Self::background(ray)
     }
 
-    pub fn shot<P: AsRef<Path>>(self, path: P) -> std::io::Result<()> {
+    /// # Errors
+    /// When open or save to file failed
+    pub fn shot<P: AsRef<Path>>(&self, path: Option<P>) -> std::io::Result<()> {
         // because picture height/width is always positive and small enough in practice
         #[allow(
             clippy::cast_sign_loss,
@@ -131,6 +138,7 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
     }
 }
 
+#[derive(Debug)]
 pub struct CameraBuilder {
     look_from: Point3,
     look_at: Point3,
@@ -156,50 +164,59 @@ impl Default for CameraBuilder {
 }
 
 impl CameraBuilder {
+    #[must_use]
     pub const fn look_from(mut self, look_from: Point3) -> Self {
         self.look_from = look_from;
         self
     }
 
+    #[must_use]
     pub const fn look_at(mut self, look_at: Point3) -> Self {
         self.look_at = look_at;
         self
     }
 
+    #[must_use]
     pub const fn vup(mut self, vup: Vec3) -> Self {
         self.vup = vup;
         self
     }
 
+    #[must_use]
     pub fn fov(mut self, fov: f64) -> Self {
         debug_assert!(0.0 < fov && fov <= 180.0, "fov = {}", fov);
         self.fov = fov;
         self
     }
 
+    #[must_use]
     pub fn aspect_ratio(mut self, aspect_ratio: f64) -> Self {
         debug_assert!(aspect_ratio > 0.0, "aspect_ratio = {}", aspect_ratio);
         self.aspect_ratio = aspect_ratio;
         self
     }
 
+    #[must_use]
     pub fn aperture(mut self, aperture: f64) -> Self {
         debug_assert!(aperture >= 0.0, "aperture = {}", aperture);
         self.aperture = aperture;
         self
     }
 
+    #[must_use]
     pub fn focus(mut self, distance: f64) -> Self {
         debug_assert!(distance >= 0.0, "distance = {}", distance);
         self.focus_distance = distance;
         self
     }
 
+    #[must_use]
     pub fn focus_to_look_at(self) -> Self {
         let distance = (&self.look_at - &self.look_from).length();
         self.focus(distance)
     }
 
+    #[must_use]
     pub fn build(self) -> Camera {
         Camera::new(
             &self.look_from,

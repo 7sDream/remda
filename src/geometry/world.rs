@@ -1,18 +1,25 @@
 use {
     super::{Geometry, HitRecord},
     crate::{material::Material, prelude::*},
-    std::{ops::Range, rc::Rc},
+    std::{
+        fmt::{Debug, Formatter},
+        ops::Range,
+        rc::Rc,
+    },
 };
 
+#[derive(Default)]
 pub struct World {
     objects: Vec<Rc<dyn Geometry>>,
 }
 
-impl World {
-    pub fn new() -> Self {
-        Self { objects: vec![] }
+impl Debug for World {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("World {{ objects: {}}}", self.objects.len()))
     }
+}
 
+impl World {
     pub fn add<G: Geometry + 'static>(&mut self, object: G) -> &mut Self {
         let object: Rc<dyn Geometry> = Rc::new(object);
         self.objects.push(object);

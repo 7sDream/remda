@@ -1,10 +1,8 @@
-use {
-    crate::{
-        camera::{CameraBuilder, Camera},
-        geometry::{Sphere, World},
-        material::{Dielectric, Glass, Lambertian, Metal},
-        prelude::*,
-    },
+use crate::{
+    camera::{Camera, CameraBuilder},
+    geometry::{Sphere, World},
+    material::{Dielectric, Glass, Lambertian, Metal},
+    prelude::*,
 };
 
 fn add_small_balls(world: &mut World, rng: &mut SeedRandom) {

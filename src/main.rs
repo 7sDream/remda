@@ -5,7 +5,7 @@
 use remda::preset::scenes::ray_tracing_in_one_weekend as final_scene;
 
 fn init_log(level: &'static str) {
-    let env = env_logger::Env::default().default_filter_or( level);
+    let env = env_logger::Env::default().default_filter_or(level);
     env_logger::init_from_env(env);
 }
 

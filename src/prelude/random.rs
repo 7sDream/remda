@@ -1,14 +1,8 @@
-use {
-    rand::{
-        Rng,
-        rngs::StdRng,
-        SeedableRng,
-    },
-    std::{
-        ops::{Range},
-    },
-};
 use rand::RngCore;
+use {
+    rand::{rngs::StdRng, Rng, SeedableRng},
+    std::ops::Range,
+};
 
 #[must_use]
 fn normal<R: Rng>(mut rng: R) -> f64 {
@@ -53,7 +47,7 @@ impl SeedRandom {
         normal(&mut self.0)
     }
 
-    pub fn range(&mut self,  r: Range<f64>) -> f64 {
+    pub fn range(&mut self, r: Range<f64>) -> f64 {
         range(&mut self.0, r)
     }
 }

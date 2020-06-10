@@ -1,4 +1,4 @@
 /target
 /.idea
 *.ppm
-
+**/.DS_Store

@@ -2,11 +2,7 @@ mod hit;
 mod sphere;
 mod world;
 
-use {
-    crate::material::Material,
-    crate::prelude::*,
-    std::{ops::Range},
-};
+use {crate::material::Material, crate::prelude::*, std::ops::Range};
 
 pub use {hit::HitRecord, sphere::Sphere, world::World};
 

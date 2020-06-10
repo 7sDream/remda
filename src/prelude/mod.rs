@@ -1,19 +1,16 @@
 mod color;
+mod random;
 mod ray;
 mod vec3;
-mod random;
 
-use std::ops::{RangeBounds, Bound};
+use std::ops::{Bound, RangeBounds};
 
 pub use {
     color::Color,
-    ray::Ray,
-    vec3::{Point3, Vec3},
     random::{Random, SeedRandom},
-    std::f64::{
-        consts::PI,
-        INFINITY,
-    },
+    ray::Ray,
+    std::f64::{consts::PI, INFINITY},
+    vec3::{Point3, Vec3},
 };
 
 #[must_use]

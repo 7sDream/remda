@@ -1,8 +1,6 @@
 use {
     crate::{geometry::Geometry, material::Material, prelude::*},
-    std::{
-        fmt::{Debug, Formatter},
-    },
+    std::fmt::{Debug, Formatter},
 };
 
 pub struct HitRecord<'m> {

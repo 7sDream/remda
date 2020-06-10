@@ -1,14 +1,20 @@
 use {
     crate::prelude::*,
     log::info,
+    rayon::prelude::*,
     std::{
+        cmp::Reverse,
+        collections::BinaryHeap,
         fs::File,
         io::{BufWriter, Write},
         iter::FromIterator,
         ops::{Index, IndexMut},
         path::Path,
+        sync::{
+            atomic::{AtomicBool, Ordering},
+            mpsc::{channel, Receiver},
+        },
     },
-    rayon::prelude::*,
 };
 
 #[derive(Debug)]
@@ -147,6 +153,50 @@ impl Painter {
         (u, v)
     }
 
+    fn write_file(
+        &self, path: Option<&Path>, rx: Receiver<(usize, String)>,
+    ) -> std::io::Result<()> {
+        let mut file: BufWriter<Box<dyn Write>> = if let Some(path) = path {
+            BufWriter::new(Box::new(File::create(&path)?))
+        } else {
+            BufWriter::new(Box::new(std::io::sink()))
+        };
+
+        write!(
+            &mut file,
+            "P3\n{width} {height}\n255\n",
+            width = self.width,
+            height = self.height
+        )?;
+
+        let mut pixels: BinaryHeap<Reverse<(usize, String)>> = BinaryHeap::new();
+        let mut current: usize = 0;
+        let mut line = 0;
+        for pixel in rx {
+            pixels.push(Reverse(pixel));
+            while let Some(&Reverse((idx, ref pixel))) = pixels.peek() {
+                if idx != current {
+                    break;
+                }
+                writeln!(&mut file, "{}", pixel)?;
+                pixels.pop();
+                current += 1;
+                if current / self.width > line {
+                    line += 1;
+                    info!("Scan line remaining: {}", self.height - line);
+                }
+            }
+            if file.buffer().len() > 64 << 10 {
+                file.flush()?;
+            }
+        }
+
+        file.flush()?;
+        drop(file);
+
+        Ok(())
+    }
+
     /// # Errors
     ///
     /// When open or save to file failed
@@ -155,45 +205,57 @@ impl Painter {
         P: AsRef<Path>,
         F: Fn(f64, f64) -> Vec3 + Send + Sync,
     {
-        let mut file: BufWriter<Box<dyn Write>> = if let Some(path) = path {
-            BufWriter::new(Box::new(File::create(path.as_ref())?))
-        } else {
-            BufWriter::new(Box::new(std::io::sink()))
+        let (tx, rx) = channel();
+
+        let cancel = AtomicBool::new(false);
+        let mut result = std::io::Result::Ok(());
+
+        let path = match path {
+            Some(ref path) => Some(path.as_ref()),
+            None => None,
         };
-        write!(
-            &mut file,
-            "P3\n{width} {height}\n255\n",
-            width = self.width,
-            height = self.height
-        )?;
 
-        for row in 0..self.height {
-            info!("Scan line remaining: {}", self.height - row);
-            for column in 0..self.width {
-                let color: Vec3 = (0..self.samples).into_par_iter()
-                    .map(|_| {
-                        let (u, v) = self.calculate_uv(row, column);
-                        uv_color(u, v)
-                    })
-                    .sum();
-                let color = color.into_color(self.samples);
-                let color = color.i();
-                writeln!(
-                    &mut file,
-                    "{r} {g} {b}",
-                    r = color.r,
-                    g = color.g,
-                    b = color.b
-                )?;
-            }
-            // 16KB
-            if file.buffer().len() >= 16 << 10 {
-                file.flush()?;
-            }
-        }
+        rayon::ThreadPoolBuilder::default()
+            .num_threads(num_cpus::get() + 1)
+            .build_global()
+            .unwrap();
+        info!("Worker Thread Count: {}", rayon::current_num_threads());
 
-        drop(file);
+        rayon::scope(|s| {
+            s.spawn(|_| {
+                (0..self.height)
+                    .into_par_iter()
+                    .for_each_with(tx, |sender, row| {
+                        (0..self.width).for_each(|column| {
+                            if cancel.load(std::sync::atomic::Ordering::Relaxed) {
+                                return;
+                            }
+                            let color: Vec3 = (0..self.samples)
+                                .map(|_| {
+                                    let (u, v) = self.calculate_uv(row, column);
+                                    uv_color(u, v)
+                                })
+                                .sum();
+                            let color = color.into_color(self.samples);
+                            let color = color.i();
+                            let idx = row * self.width + column;
+                            sender
+                                .send((
+                                    idx,
+                                    format!("{r} {g} {b}", r = color.r, g = color.g, b = color.b),
+                                ))
+                                .unwrap();
+                        });
+                    });
+            });
+            s.spawn(|_| {
+                result = self.write_file(path, rx);
+                if result.is_err() {
+                    cancel.store(true, Ordering::Relaxed);
+                }
+            })
+        });
 
-        Ok(())
+        result
     }
 }

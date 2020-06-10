@@ -3,7 +3,7 @@ use {
     crate::{geometry::HitRecord, prelude::*},
 };
 
-pub trait ReflectProbabilityCurve {
+pub trait ReflectProbabilityCurve: Send + Sync {
     fn reflect_prob(&self, cos_theta: f64, refractive: f64) -> f64;
 }
 
@@ -41,7 +41,7 @@ where
         }
     }
 
-    fn refract(&self, ray: &Ray, hit: &HitRecord) -> Option<Ray> {
+    fn refract(&self, ray: &Ray, hit: &HitRecord<'_>) -> Option<Ray> {
         let dir = ray.direction.unit();
         let cos_theta = (-&dir).dot(&hit.normal);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
@@ -67,7 +67,7 @@ impl<R> Material for Dielectric<R>
 where
     R: ReflectProbabilityCurve,
 {
-    fn scatter(&self, ray: &Ray, hit: HitRecord) -> Option<ScatterRecord> {
+    fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<ScatterRecord> {
         let refract = self
             .refract(ray, &hit)
             .unwrap_or_else(|| reflect(ray, &hit));

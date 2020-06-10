@@ -4,13 +4,13 @@ use {
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
-        rc::Rc,
+        sync::Arc,
     },
 };
 
 #[derive(Default)]
 pub struct World {
-    objects: Vec<Rc<dyn Geometry>>,
+    objects: Vec<Arc<dyn Geometry>>,
 }
 
 impl Debug for World {
@@ -21,12 +21,12 @@ impl Debug for World {
 
 impl World {
     pub fn add<G: Geometry + 'static>(&mut self, object: G) -> &mut Self {
-        let object: Rc<dyn Geometry> = Rc::new(object);
+        let object: Arc<dyn Geometry> = Arc::new(object);
         self.objects.push(object);
         self
     }
 
-    pub fn add_ref(&mut self, object: Rc<dyn Geometry>) -> &mut Self {
+    pub fn add_ref(&mut self, object: Arc<dyn Geometry>) -> &mut Self {
         self.objects.push(object);
         self
     }
@@ -37,15 +37,15 @@ impl World {
 }
 
 impl Geometry for World {
-    fn normal(&self, _p: &Point3) -> crate::prelude::Vec3 {
+    fn normal(&self, _p: &Point3) -> Vec3 {
         unimplemented!("World's normal function should not be called directly")
     }
 
-    fn material(&self) -> Rc<dyn Material> {
+    fn material(&self) -> &dyn Material {
         unimplemented!("World's material function should not be called directly")
     }
 
-    fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.objects
             .iter()
             .filter_map(|object| object.hit(r, limit.clone()))

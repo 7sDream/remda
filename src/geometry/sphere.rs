@@ -4,18 +4,17 @@ use {
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
-        rc::Rc,
     },
 };
 
-pub struct Sphere {
+pub struct Sphere<M: Material> {
     center: Point3,
     radius: f64,
-    material: Rc<dyn Material>,
+    material: M,
     radius_squared: f64,
 }
 
-impl Debug for Sphere {
+impl<M: Material> Debug for Sphere<M> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
             "Sphere {{ center: {:?}, radius: {} }}",
@@ -24,9 +23,8 @@ impl Debug for Sphere {
     }
 }
 
-impl Sphere {
-    pub fn new<M: Material + 'static>(center: Point3, radius: f64, material: M) -> Self {
-        let material = Rc::new(material);
+impl<M: Material> Sphere<M> {
+    pub fn new(center: Point3, radius: f64, material: M) -> Self {
         Self {
             center,
             radius,
@@ -36,13 +34,13 @@ impl Sphere {
     }
 }
 
-impl Geometry for Sphere {
+impl<M: Material> Geometry for Sphere<M> {
     fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
         (p - &self.center) / self.radius
     }
 
-    fn material(&self) -> Rc<dyn Material> {
-        self.material.clone()
+    fn material(&self) -> &dyn Material {
+        &self.material
     }
 
     // Ray(t) = O + tD
@@ -55,7 +53,7 @@ impl Geometry for Sphere {
     // Delta = b^2 - 4ac = 4(DL)^2 - 4 D^2 (L^2 - r2)
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
-    fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
         let l = &ray.origin - &self.center;
         let half_b = ray.direction.dot(&l);
         let a = ray.direction.length_squared();

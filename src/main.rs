@@ -17,8 +17,8 @@ fn main() {
 
     camera
         .take_photo(&world)
-        .height(108)
-        .samples(128)
+        .height(1080)
+        .samples(512)
         .shot(Some("rendered.ppm"))
         .unwrap();
 }

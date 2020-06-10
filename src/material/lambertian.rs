@@ -26,7 +26,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, hit: HitRecord) -> Option<super::ScatterRecord> {
+    fn scatter(&self, _ray: &Ray, hit: HitRecord<'_>) -> Option<super::ScatterRecord> {
         let dir = if self.use_hemi {
             Vec3::random_unit_dir(&hit.normal)
         } else {

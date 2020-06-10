@@ -21,7 +21,7 @@ impl Metal {
         self
     }
 
-    fn reflect(&self, ray: &Ray, hit: &HitRecord) -> Ray {
+    fn reflect(&self, ray: &Ray, hit: &HitRecord<'_>) -> Ray {
         let dir = ray.direction.unit();
         let mut reflected_dir = &dir - 2.0 * dir.dot(&hit.normal) * &hit.normal;
         reflected_dir += self.fuzz * Vec3::random_in_unit_hemisphere(&reflected_dir);
@@ -30,7 +30,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray: &Ray, hit: HitRecord) -> Option<ScatterRecord> {
+    fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<ScatterRecord> {
         let reflected = self.reflect(ray, &hit);
         if reflected.direction.dot(&hit.normal) > 0.0 {
             Some(ScatterRecord {

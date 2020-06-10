@@ -8,6 +8,7 @@ use {
         ops::{Index, IndexMut},
         path::Path,
     },
+    rayon::prelude::*,
 };
 
 #[derive(Debug)]
@@ -149,10 +150,10 @@ impl Painter {
     /// # Errors
     ///
     /// When open or save to file failed
-    pub fn draw<P, F>(&self, path: Option<P>, mut uv_color: F) -> std::io::Result<()>
+    pub fn draw<P, F>(&self, path: Option<P>, uv_color: F) -> std::io::Result<()>
     where
         P: AsRef<Path>,
-        F: FnMut(f64, f64) -> Vec3,
+        F: Fn(f64, f64) -> Vec3 + Send + Sync,
     {
         let mut file: BufWriter<Box<dyn Write>> = if let Some(path) = path {
             BufWriter::new(Box::new(File::create(path.as_ref())?))
@@ -169,7 +170,7 @@ impl Painter {
         for row in 0..self.height {
             info!("Scan line remaining: {}", self.height - row);
             for column in 0..self.width {
-                let color: Vec3 = (0..self.samples)
+                let color: Vec3 = (0..self.samples).into_par_iter()
                     .map(|_| {
                         let (u, v) = self.calculate_uv(row, column);
                         uv_color(u, v)

@@ -1,6 +1,6 @@
 # Remda
 
-Learn [《Ray Tracing in One Weekend》series][book] using Rust.
+Learn [《Ray Tracing in One Weekend》series][book-series] using Rust.
 
 Yet another simple and pure software ray tracing renderer.
 

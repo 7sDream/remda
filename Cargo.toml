@@ -3,6 +3,11 @@ name = "remda"
 version = "0.1.0"
 authors = ["7sDream <i@7sdre.am>"]
 edition = "2018"
+description = "Yet another simple and pure software ray tracing renderer"
+homepage = "https://github.com/7sDream/remda"
+repository = "https://github.com/7sDream/remda"
+license-file = "COPYING"
+publish = false
 
 [lib]
 name = "remda"
@@ -23,3 +28,7 @@ num_cpus = "1.13"
 name = "render"
 path = "benches/render.rs"
 harness = false
+
+[profile.release]
+lto = true
+panic = "abort"

@@ -1,19 +1,15 @@
+use std::sync::atomic::Ordering;
 use {
-    crate::prelude::*,
-    log::{error, info},
-    rayon::prelude::*,
+    crate::{internal::rayon_seq_iter::SeqForEach, prelude::*},
+    log::info,
+    rayon::{prelude::*, ThreadPool, ThreadPoolBuilder},
     std::{
-        cmp::Reverse,
-        collections::BinaryHeap,
         fs::File,
         io::{BufWriter, Write},
         iter::FromIterator,
         ops::{Index, IndexMut},
         path::Path,
-        sync::{
-            atomic::{AtomicBool, Ordering},
-            mpsc::{channel, Receiver},
-        },
+        sync::atomic::AtomicBool,
     },
 };
 
@@ -130,6 +126,11 @@ pub struct Painter {
     samples: usize,
 }
 
+struct PainterOutputContext<'c> {
+    file: BufWriter<Box<dyn Write>>,
+    cancel: &'c AtomicBool,
+}
+
 impl Painter {
     #[must_use]
     pub const fn new(width: usize, height: usize) -> Self {
@@ -153,9 +154,9 @@ impl Painter {
         (u, v)
     }
 
-    fn write_file(
-        &self, path: &Option<&Path>, rx: Receiver<(usize, String)>,
-    ) -> std::io::Result<()> {
+    fn create_output_file(
+        &self, path: Option<&Path>,
+    ) -> std::io::Result<BufWriter<Box<dyn Write>>> {
         let mut file: BufWriter<Box<dyn Write>> = if let Some(path) = path {
             BufWriter::new(Box::new(File::create(&path)?))
         } else {
@@ -169,32 +170,93 @@ impl Painter {
             height = self.height
         )?;
 
-        let mut pixels: BinaryHeap<Reverse<(usize, String)>> = BinaryHeap::new();
-        let mut current: usize = 0;
-        let mut line = 0;
-        for pixel in rx {
-            pixels.push(Reverse(pixel));
-            while let Some(&Reverse((idx, ref pixel))) = pixels.peek() {
-                if idx != current {
-                    break;
+        Ok(file)
+    }
+
+    fn create_output_context<'c>(
+        &self, path: Option<&Path>, cancel: &'c AtomicBool,
+    ) -> std::io::Result<PainterOutputContext<'c>> {
+        let file = self.create_output_file(path)?;
+        Ok(PainterOutputContext { file, cancel })
+    }
+
+    // TODO: make it return RGBInt type
+    fn render_pixel<F>(&self, row: usize, column: usize, uv_color: &F) -> (u8, u8, u8)
+    where
+        F: Fn(f64, f64) -> Vec3 + Send + Sync,
+    {
+        let color: Vec3 = (0..self.samples)
+            .map(|_| {
+                let (u, v) = self.calculate_uv(row, column);
+                uv_color(u, v)
+            })
+            .sum();
+        let color = color.into_color(self.samples);
+        let color = color.i();
+        (color.r, color.g, color.b)
+    }
+
+    fn render_row<F>(&self, row: usize, uv_color: &F, cancel: &AtomicBool) -> Vec<(u8, u8, u8)>
+    where
+        F: Fn(f64, f64) -> Vec3 + Send + Sync,
+    {
+        (0..self.width)
+            .map(|column| {
+                if cancel.load(Ordering::Relaxed) {
+                    return (0, 0, 0);
                 }
-                writeln!(&mut file, "{}", pixel)?;
-                pixels.pop();
-                current += 1;
-                if current / self.width > line {
-                    line += 1;
-                    info!("Scan line remaining: {}", self.height - line);
-                }
-            }
-            if file.buffer().len() > 64 << 10 {
-                file.flush()?;
-            }
+                self.render_pixel(row, column, &uv_color)
+            })
+            .collect::<Vec<_>>()
+    }
+
+    fn render_row_iter<'c, F>(
+        &'c self, uv_color: F, cancel: &'c AtomicBool,
+    ) -> impl IndexedParallelIterator<Item = Vec<(u8, u8, u8)>> + 'c
+    where
+        F: Fn(f64, f64) -> Vec3 + Send + Sync + 'c,
+    {
+        (0..self.height)
+            .into_par_iter()
+            .map(move |row| self.render_row(row, &uv_color, cancel))
+    }
+
+    fn real_row_pixels_to_file(
+        context: &mut PainterOutputContext<'_>, pixels: Vec<(u8, u8, u8)>,
+    ) -> std::io::Result<()> {
+        for pixel in pixels {
+            writeln!(context.file, "{} {} {}", pixel.0, pixel.1, pixel.2)?;
         }
+        context.file.flush()
+    }
 
-        file.flush()?;
-        drop(file);
+    fn row_pixels_to_file(
+        &self, context: &mut PainterOutputContext<'_>, row: usize, pixels: Vec<(u8, u8, u8)>,
+    ) -> std::io::Result<()> {
+        info!("Scan line remaining: {}", self.height - row);
+        Self::real_row_pixels_to_file(context, pixels).map_err(|e| {
+            context.cancel.store(true, Ordering::Relaxed);
+            e
+        })
+    }
 
-        Ok(())
+    fn render_and_output<F>(&self, uv_color: F, path: Option<&Path>) -> std::io::Result<()>
+    where
+        F: Fn(f64, f64) -> Vec3 + Send + Sync,
+    {
+        let cancel = AtomicBool::new(false);
+
+        self.render_row_iter(uv_color, &cancel).seq_for_each_with(
+            || self.create_output_context(path, &cancel),
+            |context, row, pixels| self.row_pixels_to_file(context, row, pixels),
+        )
+    }
+
+    fn setup_thread_pool() -> std::io::Result<ThreadPool> {
+        ThreadPoolBuilder::default()
+            .num_threads(num_cpus::get() + 1)
+            .build()
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }
 
     /// # Errors
@@ -205,61 +267,15 @@ impl Painter {
         P: AsRef<Path>,
         F: Fn(f64, f64) -> Vec3 + Send + Sync,
     {
-        let (tx, rx) = channel();
-
-        let cancel = AtomicBool::new(false);
-        let mut result = std::io::Result::Ok(());
-
         let path = match path {
             Some(ref path) => Some(path.as_ref()),
             None => None,
         };
 
-        rayon::ThreadPoolBuilder::default()
-            .num_threads(num_cpus::get() + 1)
-            .build_global()
-            .map_err(|err| {
-                error!("{}", err);
-                std::io::Error::new(std::io::ErrorKind::Other, err)
-            })?;
+        let pool = Self::setup_thread_pool()?;
 
-        info!("Worker Thread Count: {}", rayon::current_num_threads());
+        info!("Worker thread count: {}", pool.current_num_threads());
 
-        rayon::scope(|s| {
-            s.spawn(|_| {
-                (0..self.height)
-                    .into_par_iter()
-                    .for_each_with(tx, |sender, row| {
-                        (0..self.width).for_each(|column| {
-                            if cancel.load(std::sync::atomic::Ordering::SeqCst) {
-                                return;
-                            }
-                            let color: Vec3 = (0..self.samples)
-                                .map(|_| {
-                                    let (u, v) = self.calculate_uv(row, column);
-                                    uv_color(u, v)
-                                })
-                                .sum();
-                            let color = color.into_color(self.samples);
-                            let color = color.i();
-                            let idx = row * self.width + column;
-                            // If rx is dropped, means write_file method failed.
-                            // Pixel data can be dropped safely, so we don't need unwrap here
-                            let _ = sender.send((
-                                idx,
-                                format!("{r} {g} {b}", r = color.r, g = color.g, b = color.b),
-                            ));
-                        });
-                    });
-            });
-            s.spawn(|_| {
-                result = self.write_file(&path, rx);
-                if result.is_err() {
-                    cancel.store(true, Ordering::SeqCst);
-                }
-            })
-        });
-
-        result
+        pool.install(|| self.render_and_output(uv_color, path))
     }
 }

@@ -17,7 +17,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Lambertian Material
     - [x] Metal Material with Different Fuzz
     - [x] Glass Material with Refractive
-    - [x] Single Hole Camera
+    - [x] Pinhole Camera
     - [x] Camera defocus/depth field
     - [ ] Lights
     - [ ] Triangles Geometry

@@ -22,7 +22,7 @@ Yet another simple and pure software ray tracing renderer.
     - [ ] Triangles Geometry
     - [x] Parallelism (by using [rayon][rayon-crates-io])
 - [ ] [《Ray Tracing: The Next Week》][book-2]
-    - [ ] Motion Blur
+    - [x] Motion Blur
     - [ ] BVH(Bounding Volume Hierarchies)
     - [ ] Solid Textures
     - [ ] Perlin Noise

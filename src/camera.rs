@@ -85,6 +85,12 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
     }
 
     #[must_use]
+    pub const fn depth(mut self, depth: usize) -> Self {
+        self.depth = depth;
+        self
+    }
+
+    #[must_use]
     pub const fn samples(mut self, samples: usize) -> Self {
         self.samples = samples;
         self

@@ -22,7 +22,7 @@ impl Debug for HitRecord<'_> {
 
 impl<'m> HitRecord<'m> {
     pub fn new<G: Geometry>(r: &Ray, object: &'m G, t: f64) -> Self {
-        let point = r.at(t);
+        let point = r.position_after(t);
         let mut normal = object.normal(&point);
         let outside = r.direction.dot(&normal) < 0.0;
         if !outside {

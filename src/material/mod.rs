@@ -23,5 +23,5 @@ pub trait Material: Send + Sync {
 pub(crate) fn reflect(ray: &Ray, hit: &HitRecord<'_>) -> Ray {
     let dir = ray.direction.unit();
     let reflected_dir = &dir - 2.0 * dir.dot(&hit.normal) * &hit.normal;
-    Ray::new(hit.point.clone(), reflected_dir)
+    Ray::new(hit.point.clone(), reflected_dir, ray.departure_time)
 }

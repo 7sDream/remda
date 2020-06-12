@@ -26,13 +26,13 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, hit: HitRecord<'_>) -> Option<super::ScatterRecord> {
+    fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<super::ScatterRecord> {
         let dir = if self.use_hemi {
             Vec3::random_unit_dir(&hit.normal)
         } else {
             hit.normal + Vec3::random_unit()
         };
-        let new_ray = Ray::new(hit.point, dir);
+        let new_ray = Ray::new(hit.point, dir, ray.departure_time);
         Some(ScatterRecord {
             color: self.color.clone(),
             ray: new_ray,

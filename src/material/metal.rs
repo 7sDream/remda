@@ -25,7 +25,7 @@ impl Metal {
         let dir = ray.direction.unit();
         let mut reflected_dir = &dir - 2.0 * dir.dot(&hit.normal) * &hit.normal;
         reflected_dir += self.fuzz * Vec3::random_in_unit_hemisphere(&reflected_dir);
-        Ray::new(hit.point.clone(), reflected_dir)
+        Ray::new(hit.point.clone(), reflected_dir, ray.departure_time)
     }
 }
 

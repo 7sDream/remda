@@ -15,13 +15,14 @@ pub struct Camera {
     vertical_unit: Vec3,
     aspect_ratio: f64,
     aperture: f64,
+    shutter_speed: f64,
 }
 
 impl Camera {
     #[allow(clippy::too_many_arguments, clippy::needless_pass_by_value)] // internal
     pub(self) fn new(
         look_from: &Point3, look_at: &Point3, vup: &Vec3, fov: f64, aspect_ratio: f64,
-        aperture: f64, focus_distance: f64,
+        aperture: f64, focus_distance: f64, shutter_speed: f64,
     ) -> Self {
         let fov = d2r(fov);
         let h = (fov / 2.0).tan();
@@ -44,6 +45,7 @@ impl Camera {
             vertical_unit,
             aspect_ratio,
             aperture,
+            shutter_speed,
         }
     }
 
@@ -54,7 +56,7 @@ impl Camera {
         let origin = &self.origin + offset;
         let direction = &self.lb + u * &self.horizontal_full + v * &self.vertical_full - &origin;
 
-        Ray::new(origin, direction)
+        Ray::new(origin, direction, self.shutter_speed * Random::normal())
     }
 
     #[must_use]
@@ -154,6 +156,7 @@ pub struct CameraBuilder {
     aspect_ratio: f64,
     aperture: f64,
     focus_distance: f64,
+    shutter_speed: f64,
 }
 
 impl Default for CameraBuilder {
@@ -166,6 +169,7 @@ impl Default for CameraBuilder {
             aspect_ratio: 16.0 / 9.0,
             aperture: 0.0,
             focus_distance: 1.0,
+            shutter_speed: 0.0,
         }
     }
 }
@@ -224,6 +228,12 @@ impl CameraBuilder {
     }
 
     #[must_use]
+    pub fn shutter_speed(mut self, duration: f64) -> Self {
+        self.shutter_speed = duration;
+        self
+    }
+
+    #[must_use]
     pub fn build(self) -> Camera {
         Camera::new(
             &self.look_from,
@@ -233,6 +243,7 @@ impl CameraBuilder {
             self.aspect_ratio,
             self.aperture,
             self.focus_distance,
+            self.shutter_speed,
         )
     }
 }

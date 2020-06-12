@@ -10,6 +10,7 @@ use {
 pub struct Sphere<M: Material> {
     center: Point3,
     radius: f64,
+    speed: Vec3,
     material: M,
     radius_squared: f64,
 }
@@ -17,8 +18,8 @@ pub struct Sphere<M: Material> {
 impl<M: Material> Debug for Sphere<M> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
-            "Sphere {{ center: {:?}, radius: {} }}",
-            self.center, self.radius
+            "Sphere {{ center: {:?}, radius: {}, speed: {:?} }}",
+            self.center, self.radius, self.speed,
         ))
     }
 }
@@ -29,8 +30,14 @@ impl<M: Material> Sphere<M> {
             center,
             radius,
             material,
+            speed: Vec3::default(),
             radius_squared: radius * radius,
         }
+    }
+
+    pub fn with_speed(mut self, speed: Vec3) -> Self {
+        self.speed = speed;
+        self
     }
 }
 
@@ -54,7 +61,8 @@ impl<M: Material> Geometry for Sphere<M> {
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
     fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
-        let l = &ray.origin - &self.center;
+        let current_center = &self.center + &self.speed * ray.departure_time;
+        let l = &ray.origin - current_center;
         let half_b = ray.direction.dot(&l);
         let a = ray.direction.length_squared();
         let c = l.length_squared() - self.radius_squared;

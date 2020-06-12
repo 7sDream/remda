@@ -3,7 +3,7 @@
 #![deny(warnings)]
 #![allow(clippy::module_name_repetitions)]
 
-use remda::preset::scenes::ray_tracing_in_one_weekend as final_scene;
+use remda::preset::scenes::ray_tracing_in_one_weekend::final_scene as scene;
 
 fn init_log(level: &'static str) {
     let env = env_logger::Env::default().default_filter_or(level);
@@ -13,8 +13,7 @@ fn init_log(level: &'static str) {
 fn main() {
     init_log("info");
 
-    let world = final_scene::world(None);
-    let camera = final_scene::camera();
+    let (camera, world) = scene(None);
 
     camera
         .take_photo(&world)

@@ -59,7 +59,7 @@ where
         let r_parallel = refractive * (&dir + cos_theta * &hit.normal);
         let r_perp = -(1.0 - r_parallel.length_squared()).sqrt() * &hit.normal;
         let r = r_parallel + r_perp;
-        Some(Ray::new(hit.point.clone(), r))
+        Some(Ray::new(hit.point.clone(), r, ray.departure_time))
     }
 }
 

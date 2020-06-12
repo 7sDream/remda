@@ -13,19 +13,25 @@ Yet another simple and pure software ray tracing renderer.
 - [ ] [《Ray Tracing in One Weekend》][book-1]
     - [x] Basic types, Vec, Color, Ray, etc
     - [x] Background/Sky
-    - [x] Sphere Geometry
+    - [x] Sphere
     - [x] Lambertian Material
     - [x] Metal Material with Different Fuzz
-    - [x] Glass Material with Refractive
+    - [x] Glass Material with Different Refractive
     - [x] Pinhole Camera
-    - [x] Camera defocus/depth field
-    - [ ] Lights
+    - [x] Camera Defocus/Depth Field
     - [ ] Triangles Geometry
-    - [ ] Surface Textures
-    - [ ] Solid textures
-    - [ ] Volumes and Media
     - [x] Parallelism (by using [rayon][rayon-crates-io])
-- [ ] [《Ray Tracing: The Next Week》][book-2] not started yet
+- [ ] [《Ray Tracing: The Next Week》][book-2]
+    - [ ] Motion Blur
+    - [ ] BVH(Bounding Volume Hierarchies)
+    - [ ] Solid Textures
+    - [ ] Perlin Noise
+    - [ ] Image Textures
+    - [ ] Rectangles
+    - [ ] Lights
+    - [ ] Box
+    - [ ] Object Translation
+    - [ ] Volumes
 - [ ] [《Ray Tracing: The Rest of Your Life》][book-3] not started yet
 
 ## Run

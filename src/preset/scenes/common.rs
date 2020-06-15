@@ -70,6 +70,11 @@ fn add_big_balls(world: &mut World) {
 #[must_use]
 pub fn world(seed: Option<u64>, need_speed: bool) -> World {
     let mut world = World::default();
+    world.set_bg(|ray| {
+        let unit = ray.direction.unit();
+        let t = 0.5 * (unit.y + 1.0);
+        Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+    });
 
     // Ground
     world.add(Sphere::new(

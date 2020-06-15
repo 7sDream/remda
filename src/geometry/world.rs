@@ -4,13 +4,13 @@ use {
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
-        sync::Arc,
     },
 };
 
 #[derive(Default)]
 pub struct World {
-    objects: Vec<Arc<dyn Geometry>>,
+    background: Option<Box<dyn Fn(&Ray) -> Color + Send + Sync>>,
+    objects: Vec<Box<dyn Geometry>>,
 }
 
 impl Debug for World {
@@ -21,18 +21,34 @@ impl Debug for World {
 
 impl World {
     pub fn add<G: Geometry + 'static>(&mut self, object: G) -> &mut Self {
-        let object: Arc<dyn Geometry> = Arc::new(object);
+        let object: Box<dyn Geometry> = Box::new(object);
         self.objects.push(object);
         self
     }
 
-    pub fn add_ref(&mut self, object: Arc<dyn Geometry>) -> &mut Self {
+    pub fn add_ref(&mut self, object: Box<dyn Geometry>) -> &mut Self {
         self.objects.push(object);
         self
     }
 
     pub fn clear(&mut self) {
         self.objects.clear();
+    }
+
+    pub fn set_bg<F>(&mut self, f: F)
+    where
+        F: Fn(&Ray) -> Color + Send + Sync + 'static,
+    {
+        self.background = Some(Box::new(f));
+    }
+
+    #[must_use]
+    pub fn background(&self, ray: &Ray) -> Color {
+        if let Some(f) = &self.background {
+            f(ray)
+        } else {
+            Color::default()
+        }
     }
 }
 

@@ -124,6 +124,9 @@ pub struct Painter {
     pub width: usize,
     pub height: usize,
     samples: usize,
+    gamma: bool,
+    threads: usize,
+    parallel: bool,
 }
 
 struct PainterOutputContext<'c> {
@@ -137,13 +140,34 @@ impl Painter {
         Self {
             width,
             height,
-            samples: 1,
+            gamma: true,
+            samples: 50,
+            threads: 0,
+            parallel: true,
         }
     }
 
     #[must_use]
-    pub const fn set_samples(mut self, samples: usize) -> Self {
+    pub const fn gamma(mut self, gamma: bool) -> Self {
+        self.gamma = gamma;
+        self
+    }
+
+    #[must_use]
+    pub const fn samples(mut self, samples: usize) -> Self {
         self.samples = samples;
+        self
+    }
+
+    #[must_use]
+    pub const fn threads(mut self, threads: usize) -> Self {
+        self.threads = threads;
+        self
+    }
+
+    #[must_use]
+    pub const fn parallel(mut self, parallel: bool) -> Self {
+        self.parallel = parallel;
         self
     }
 
@@ -191,12 +215,14 @@ impl Painter {
                 uv_color(u, v)
             })
             .sum();
-        let color = color.into_color(self.samples);
+        let color = color.into_color(self.samples, self.gamma);
         let color = color.i();
         (color.r, color.g, color.b)
     }
 
-    fn render_row<F>(&self, row: usize, uv_color: &F, cancel: &AtomicBool) -> Vec<(u8, u8, u8)>
+    fn parallel_render_row<F>(
+        &self, row: usize, uv_color: &F, cancel: &AtomicBool,
+    ) -> Vec<(u8, u8, u8)>
     where
         F: Fn(f64, f64) -> Vec3 + Send + Sync,
     {
@@ -210,7 +236,16 @@ impl Painter {
             .collect::<Vec<_>>()
     }
 
-    fn render_row_iter<'c, F>(
+    fn seq_render_row<F>(&self, row: usize, uv_color: &F) -> Vec<(u8, u8, u8)>
+    where
+        F: Fn(f64, f64) -> Vec3 + Send + Sync,
+    {
+        (0..self.width)
+            .map(|column| self.render_pixel(row, column, &uv_color))
+            .collect::<Vec<_>>()
+    }
+
+    fn parallel_render_row_iter<'c, F>(
         &'c self, uv_color: F, cancel: &'c AtomicBool,
     ) -> impl IndexedParallelIterator<Item = Vec<(u8, u8, u8)>> + 'c
     where
@@ -218,7 +253,16 @@ impl Painter {
     {
         (0..self.height)
             .into_par_iter()
-            .map(move |row| self.render_row(row, &uv_color, cancel))
+            .map(move |row| self.parallel_render_row(row, &uv_color, cancel))
+    }
+
+    fn seq_render_row_iter<'c, F>(
+        &'c self, uv_color: F,
+    ) -> impl Iterator<Item = Vec<(u8, u8, u8)>> + 'c
+    where
+        F: Fn(f64, f64) -> Vec3 + Send + Sync + 'c,
+    {
+        (0..self.height).map(move |row| self.seq_render_row(row, &uv_color))
     }
 
     fn real_row_pixels_to_file(
@@ -240,21 +284,27 @@ impl Painter {
         })
     }
 
-    fn render_and_output<F>(&self, uv_color: F, path: Option<&Path>) -> std::io::Result<()>
+    fn parallel_render_and_output<F>(&self, uv_color: F, path: Option<&Path>) -> std::io::Result<()>
     where
         F: Fn(f64, f64) -> Vec3 + Send + Sync,
     {
         let cancel = AtomicBool::new(false);
 
-        self.render_row_iter(uv_color, &cancel).seq_for_each_with(
-            || self.create_output_context(path, &cancel),
-            |context, row, pixels| self.row_pixels_to_file(context, row, pixels),
-        )
+        self.parallel_render_row_iter(uv_color, &cancel)
+            .seq_for_each_with(
+                || self.create_output_context(path, &cancel),
+                |context, row, pixels| self.row_pixels_to_file(context, row, pixels),
+            )
     }
 
-    fn setup_thread_pool() -> std::io::Result<ThreadPool> {
+    fn setup_thread_pool(&self) -> std::io::Result<ThreadPool> {
+        let threads = if self.threads == 0 {
+            num_cpus::get() + 1
+        } else {
+            self.threads + 1
+        };
         ThreadPoolBuilder::default()
-            .num_threads(num_cpus::get() + 1)
+            .num_threads(threads)
             .build()
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }
@@ -272,10 +322,19 @@ impl Painter {
             None => None,
         };
 
-        let pool = Self::setup_thread_pool()?;
+        if self.parallel {
+            let pool = self.setup_thread_pool()?;
 
-        info!("Worker thread count: {}", pool.current_num_threads());
+            info!("Worker thread count: {}", pool.current_num_threads());
 
-        pool.install(|| self.render_and_output(uv_color, path))
+            pool.install(|| self.parallel_render_and_output(uv_color, path))
+        } else {
+            let cancel = AtomicBool::new(false); // useless in parallel mode
+            let mut context = self.create_output_context(path, &cancel)?;
+            for (row, pixels) in self.seq_render_row_iter(uv_color).enumerate() {
+                self.row_pixels_to_file(&mut context, row, pixels)?;
+            }
+            Ok(())
+        }
     }
 }

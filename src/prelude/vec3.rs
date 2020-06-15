@@ -125,9 +125,13 @@ impl Vec3 {
 
     #[allow(clippy::cast_precision_loss)] // sample count is small enough in practice
     #[must_use]
-    pub fn into_color(mut self, sample_count: usize) -> Color {
+    pub fn into_color(mut self, sample_count: usize, gamma: bool) -> Color {
         self /= sample_count as f64;
-        Color::newf(self.x.sqrt(), self.y.sqrt(), self.z.sqrt())
+        if gamma {
+            Color::newf(self.x.sqrt(), self.y.sqrt(), self.z.sqrt())
+        } else {
+            Color::newf(self.x, self.y, self.z)
+        }
     }
 }
 

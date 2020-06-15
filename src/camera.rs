@@ -70,8 +70,11 @@ pub struct TakePhotoSettings<'c, 'w> {
     camera: &'c Camera,
     world: &'w World,
     depth: usize,
-    samples: usize,
     picture_height: usize,
+    gamma: bool,
+    samples: usize,
+    threads: usize,
+    parallel: bool,
 }
 
 impl<'c, 'w> TakePhotoSettings<'c, 'w> {
@@ -81,8 +84,11 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
             camera,
             world,
             depth: 8,
-            samples: 50,
             picture_height: 108,
+            gamma: true,
+            samples: 50,
+            threads: 0,
+            parallel: true,
         }
     }
 
@@ -93,21 +99,33 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
     }
 
     #[must_use]
+    pub const fn height(mut self, height: usize) -> Self {
+        self.picture_height = height;
+        self
+    }
+
+    #[must_use]
+    pub const fn gamma(mut self, gamma: bool) -> Self {
+        self.gamma = gamma;
+        self
+    }
+
+    #[must_use]
     pub const fn samples(mut self, samples: usize) -> Self {
         self.samples = samples;
         self
     }
 
     #[must_use]
-    pub const fn height(mut self, height: usize) -> Self {
-        self.picture_height = height;
+    pub const fn threads(mut self, threads: usize) -> Self {
+        self.threads = threads;
         self
     }
 
-    fn background(ray: &Ray) -> Color {
-        let unit = ray.direction.unit();
-        let t = 0.5 * (unit.y + 1.0);
-        Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+    #[must_use]
+    pub const fn parallel(mut self, parallel: bool) -> Self {
+        self.parallel = parallel;
+        self
     }
 
     fn ray_color(ray: &Ray, world: &World, depth: usize) -> Color {
@@ -122,7 +140,7 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
             return Color::default();
         }
 
-        Self::background(ray)
+        world.background(ray)
     }
 
     /// # Errors
@@ -139,7 +157,10 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
             (self.picture_height as f64 * self.camera.aspect_ratio).round() as usize,
             self.picture_height,
         )
-        .set_samples(self.samples)
+        .gamma(self.gamma)
+        .samples(self.samples)
+        .threads(self.threads)
+        .parallel(self.parallel)
         .draw(&path, |u, v| -> Vec3 {
             let ray = self.camera.ray(u, v);
             Self::ray_color(&ray, self.world, self.depth).into()
@@ -229,6 +250,7 @@ impl CameraBuilder {
 
     #[must_use]
     pub fn shutter_speed(mut self, duration: f64) -> Self {
+        debug_assert!(duration >= 0.0, "distance = {}", duration);
         self.shutter_speed = duration;
         self
     }

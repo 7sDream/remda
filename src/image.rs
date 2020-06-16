@@ -173,9 +173,15 @@ impl Painter {
 
     #[allow(clippy::cast_precision_loss)] // because row and column is small enough in practice
     fn calculate_uv(&self, row: usize, column: usize) -> (f64, f64) {
-        let u = (column as f64 + Random::normal()) / self.width as f64;
-        let v = ((self.height - 1 - row) as f64 + Random::normal()) / self.height as f64;
-        (u, v)
+        if self.samples == 1 {
+            let u = (column as f64) / self.width as f64;
+            let v = ((self.height - 1 - row) as f64) / self.height as f64;
+            (u, v)
+        } else {
+            let u = (column as f64 + Random::normal()) / self.width as f64;
+            let v = ((self.height - 1 - row) as f64 + Random::normal()) / self.height as f64;
+            (u, v)
+        }
     }
 
     fn create_output_file(

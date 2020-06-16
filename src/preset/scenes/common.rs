@@ -7,17 +7,17 @@ use crate::{
 
 fn add_small_balls(world: &mut World, rng: &mut SeedRandom, need_speed: bool) {
     let small_ball_radius = 0.2;
-    let avoid = Point3::new(4.0, 0.2, 0.0);
+    let avoid = Point3::new(4.0, 1.0, 0.0);
     for a in -11..11 {
         for b in -11..11 {
-            let mat = rng.normal();
             let center = Point3::new(
                 0.9_f64.mul_add(rng.normal(), f64::from(a)),
                 0.2,
                 0.9_f64.mul_add(rng.normal(), f64::from(b)),
             );
 
-            if (&center - &avoid).length() > 0.9 {
+            if (&center - &avoid).length() > 1.2 {
+                let mat = rng.normal();
                 if mat < 0.8 {
                     let color = Color::newf(rng.normal(), rng.normal(), rng.normal());
                     let material = Lambertian::new(color);

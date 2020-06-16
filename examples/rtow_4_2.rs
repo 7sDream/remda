@@ -14,7 +14,7 @@ fn main() {
 
     camera
         .take_photo(&world)
-        .height(216)
+        .height(432)
         .gamma(false)
         .samples(1)
         .shot(Some("rtow_4_2.ppm"))

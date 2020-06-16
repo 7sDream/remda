@@ -4,9 +4,39 @@ use {
 };
 
 #[derive(Debug)]
+pub enum LambertianMathType {
+    Approximates,
+    True,
+    Hemisphere,
+}
+
+impl LambertianMathType {
+    #[must_use]
+    pub fn scatter_ray(&self, ray: &Ray, hit: HitRecord<'_>) -> Ray {
+        match self {
+            Self::Approximates => Ray::new(
+                hit.point,
+                hit.normal + Vec3::random_in_unit_sphere(),
+                ray.departure_time,
+            ),
+            Self::True => Ray::new(
+                hit.point,
+                hit.normal + Vec3::random_unit(),
+                ray.departure_time,
+            ),
+            Self::Hemisphere => Ray::new(
+                hit.point,
+                Vec3::random_unit_dir(&hit.normal),
+                ray.departure_time,
+            ),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct Lambertian {
     color: Color,
-    use_hemi: bool,
+    math_type: LambertianMathType,
 }
 
 impl Lambertian {
@@ -14,25 +44,20 @@ impl Lambertian {
     pub const fn new(color: Color) -> Self {
         Self {
             color,
-            use_hemi: false,
+            math_type: LambertianMathType::True,
         }
     }
 
     #[must_use]
-    pub const fn hemi(mut self, value: bool) -> Self {
-        self.use_hemi = value;
+    pub const fn math_type(mut self, value: LambertianMathType) -> Self {
+        self.math_type = value;
         self
     }
 }
 
 impl Material for Lambertian {
     fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<super::ScatterRecord> {
-        let dir = if self.use_hemi {
-            Vec3::random_unit_dir(&hit.normal)
-        } else {
-            hit.normal + Vec3::random_unit()
-        };
-        let new_ray = Ray::new(hit.point, dir, ray.departure_time);
+        let new_ray = self.math_type.scatter_ray(ray, hit);
         Some(ScatterRecord {
             color: self.color.clone(),
             ray: new_ray,

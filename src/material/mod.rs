@@ -6,7 +6,7 @@ mod metal;
 
 pub use {
     dielectric::{Dielectric, Glass},
-    lambertian::Lambertian,
+    lambertian::{Lambertian, LambertianMathType},
     metal::Metal,
 };
 

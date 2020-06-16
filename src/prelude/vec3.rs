@@ -27,7 +27,11 @@ impl Vec3 {
 
     #[must_use]
     pub fn random_in_unit_box() -> Self {
-        Self::new(Random::normal(), Random::normal(), Random::normal())
+        Self::new(
+            Random::range(-1.0..1.0),
+            Random::range(-1.0..1.0),
+            Random::range(-1.0..1.0),
+        )
     }
 
     #[must_use]

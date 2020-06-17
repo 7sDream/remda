@@ -7,7 +7,7 @@ use crate::{
 
 fn add_small_balls(world: &mut World, rng: &mut SeedRandom, need_speed: bool) {
     let small_ball_radius = 0.2;
-    let avoid = Point3::new(4.0, 1.0, 0.0);
+    let mut avoid = Point3::new(0.0, 0.2, 0.0);
     for a in -11..11 {
         for b in -11..11 {
             let center = Point3::new(
@@ -16,7 +16,11 @@ fn add_small_balls(world: &mut World, rng: &mut SeedRandom, need_speed: bool) {
                 0.9_f64.mul_add(rng.normal(), f64::from(b)),
             );
 
-            if (&center - &avoid).length() > 1.2 {
+            avoid.x = center.x;
+
+            if !((0.0..0.9).contains(&center.x.abs()) || (3.1..4.9).contains(&center.x.abs()))
+                || (&center - &avoid).length() >= 0.9
+            {
                 let mat = rng.normal();
                 if mat < 0.8 {
                     let color = Color::newf(rng.normal(), rng.normal(), rng.normal());
@@ -39,7 +43,7 @@ fn add_small_balls(world: &mut World, rng: &mut SeedRandom, need_speed: bool) {
                     world.add(Sphere::new(
                         center,
                         small_ball_radius,
-                        Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5, Glass {}),
+                        Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
                     ));
                 }
             }
@@ -51,7 +55,7 @@ fn add_big_balls(world: &mut World) {
     world.add(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
-        Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5, Glass {}),
+        Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
     ));
 
     world.add(Sphere::new(

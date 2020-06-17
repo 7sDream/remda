@@ -1,6 +1,6 @@
 use {
     super::common,
-    crate::{camera::Camera, geometry::World},
+    remda::{camera::Camera, geometry::World},
 };
 
 #[must_use]

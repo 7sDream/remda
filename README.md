@@ -36,15 +36,23 @@ Yet another simple and pure software ray tracing renderer.
 
 ## Run
 
+Remda is a library crate, but you can run built-in examples(from the book series) to try it.
+
+Use `cargo run --example` to get examples list, then choose one to run.
+
+For example, to get final scene in section 13.1 of《Ray Tracing in One Weekend》, run
+
 ```bash
-$ cargo run --release
+$ cargo run --example rtow_13_1 --release
 ```
 
-Wait about 10s(according to your machine's CPU performance), you will get a `rendered.ppm` in current dir, that's your result.
+Wait about 10s(according to your machine's CPU performance), you will get a `rtow_13_1.ppm` in current dir, that's your result.
 
-If you want a bigger and clear image, adjust `height()` and `samples()` argument in `main.rs` and re-run.
+If you want a bigger and clear image, adjust `height()` and `samples()` argument in example source file and re-run.
 
-The screenshot above takes about 1 hours to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient;
+PS: The screenshot above takes about 1 hours to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient;
+
+You can also try other examples if you want.
 
 ## LICENSE
 

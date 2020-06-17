@@ -1,4 +1,4 @@
-use crate::{
+use remda::{
     camera::{Camera, CameraBuilder},
     geometry::{Sphere, World},
     material::{Dielectric, Glass, Lambertian, Metal},

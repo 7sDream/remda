@@ -62,5 +62,5 @@ GPLv3
 [book-1]: https://raytracing.github.io/books/RayTracingInOneWeekend.html
 [book-2]: https://raytracing.github.io/books/RayTracingTheNextWeek.html
 [book-3]: https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
-[screenshot]: https://rikka.7sdre.am/files/bb651ecd-a6d4-4f88-bf81-98757390eb60.png
+[screenshot]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
 [rayon-crates-io]: https://crates.io/crates/rayon

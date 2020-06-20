@@ -23,7 +23,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Parallelism (by using [rayon][rayon-crates-io])
 - [ ] [《Ray Tracing: The Next Week》][book-2]
     - [x] Motion Blur
-    - [ ] BVH(Bounding Volume Hierarchies)
+    - [x] BVH(Bounding Volume Hierarchies)
     - [ ] Solid Textures
     - [ ] Perlin Noise
     - [ ] Image Textures
@@ -46,11 +46,11 @@ For example, to get final scene in section 13.1 of《Ray Tracing in One Weekend�
 $ cargo run --example rtow_13_1 --release
 ```
 
-Wait about 10s(according to your machine's CPU performance), you will get a `rtow_13_1.ppm` in current dir, that's your result.
+Wait about 1s(according to your machine's CPU performance), you will get a `rtow_13_1.ppm` in current dir, that's your result.
 
 If you want a bigger and clear image, adjust `height()` and `samples()` argument in example source file and re-run.
 
-PS: The screenshot above takes about 1 hours to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient;
+PS: The screenshot above takes about 8min30s to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient;
 
 You can also try other examples if you want.
 

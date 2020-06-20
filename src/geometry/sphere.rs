@@ -1,5 +1,5 @@
 use {
-    super::{Geometry, HitRecord},
+    super::{Geometry, HitRecord, AABB},
     crate::{material::Material, prelude::*},
     std::{
         fmt::{Debug, Formatter},
@@ -39,6 +39,10 @@ impl<M: Material> Sphere<M> {
         self.speed = speed;
         self
     }
+
+    pub fn center_at(&self, t: f64) -> Point3 {
+        &self.center + &self.speed * t
+    }
 }
 
 impl<M: Material> Geometry for Sphere<M> {
@@ -61,7 +65,7 @@ impl<M: Material> Geometry for Sphere<M> {
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
     fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
-        let current_center = &self.center + &self.speed * ray.departure_time;
+        let current_center = self.center_at(ray.departure_time);
         let l = &ray.origin - current_center;
         let half_b = ray.direction.dot(&l);
         let a = ray.direction.length_squared();
@@ -85,5 +89,28 @@ impl<M: Material> Geometry for Sphere<M> {
         }
 
         None
+    }
+
+    fn bbox(&self, limit: Range<f64>) -> Option<AABB> {
+        Some(
+            if self.speed.x == 0.0 && self.speed.y == 0.0 && self.speed.z == 0.0 {
+                AABB::new(
+                    &self.center - Vec3::new(self.radius, self.radius, self.radius),
+                    &self.center + Vec3::new(self.radius, self.radius, self.radius),
+                )
+            } else {
+                let start = AABB::new(
+                    self.center_at(limit.start) - Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(limit.start) + Vec3::new(self.radius, self.radius, self.radius),
+                );
+
+                let end = AABB::new(
+                    self.center_at(limit.end) - Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(limit.end) + Vec3::new(self.radius, self.radius, self.radius),
+                );
+
+                start | end
+            },
+        )
     }
 }

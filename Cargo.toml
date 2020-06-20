@@ -13,10 +13,6 @@ publish = false
 name = "remda"
 path = "src/lib.rs"
 
-[[bin]]
-name = "remda"
-path = "src/main.rs"
-
 [dependencies]
 env_logger = "0.7"
 log = "0.4"

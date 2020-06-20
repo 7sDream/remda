@@ -10,7 +10,7 @@ use {
     },
 };
 
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, PartialOrd, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,

@@ -1,3 +1,4 @@
+use crate::geometry::AABB;
 use {
     super::{Geometry, HitRecord},
     crate::{material::Material, prelude::*},
@@ -50,6 +51,10 @@ impl World {
             Color::default()
         }
     }
+
+    pub fn into_vec(self) -> Vec<Box<dyn Geometry>> {
+        self.objects
+    }
 }
 
 impl Geometry for World {
@@ -66,5 +71,20 @@ impl Geometry for World {
             .iter()
             .filter_map(|object| object.hit(r, limit.clone()))
             .min_by(|r1, r2| r1.t.partial_cmp(&r2.t).unwrap())
+    }
+
+    fn bbox(&self, limit: Range<f64>) -> Option<AABB> {
+        if self.objects.is_empty() {
+            return None;
+        }
+
+        let mut result: Option<AABB> = None;
+
+        for object in &self.objects {
+            let bbox = object.bbox(limit.clone())?;
+            result = result.map(|last| last | &bbox).or_else(|| Some(bbox))
+        }
+
+        result
     }
 }

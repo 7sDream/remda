@@ -1,6 +1,6 @@
 use crate::geometry::AABB;
 use {
-    super::{Geometry, HitRecord},
+    super::{Geometry, HitRecord, BVH},
     crate::{material::Material, prelude::*},
     std::{
         fmt::{Debug, Formatter},
@@ -52,8 +52,9 @@ impl World {
         }
     }
 
-    pub fn into_vec(self) -> Vec<Box<dyn Geometry>> {
-        self.objects
+    #[must_use]
+    pub fn into_bvh(self, time_limit: Range<f64>) -> BVH {
+        BVH::new(self.objects, time_limit)
     }
 }
 
@@ -66,14 +67,14 @@ impl Geometry for World {
         unimplemented!("World's material function should not be called directly")
     }
 
-    fn hit(&self, r: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
+    fn hit(&self, r: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.objects
             .iter()
-            .filter_map(|object| object.hit(r, limit.clone()))
+            .filter_map(|object| object.hit(r, unit_limit.clone()))
             .min_by(|r1, r2| r1.t.partial_cmp(&r2.t).unwrap())
     }
 
-    fn bbox(&self, limit: Range<f64>) -> Option<AABB> {
+    fn bbox(&self, time_limit: Range<f64>) -> Option<AABB> {
         if self.objects.is_empty() {
             return None;
         }
@@ -81,7 +82,7 @@ impl Geometry for World {
         let mut result: Option<AABB> = None;
 
         for object in &self.objects {
-            let bbox = object.bbox(limit.clone())?;
+            let bbox = object.bbox(time_limit.clone())?;
             result = result.map(|last| last | &bbox).or_else(|| Some(bbox))
         }
 

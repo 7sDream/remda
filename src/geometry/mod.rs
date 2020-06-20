@@ -11,6 +11,6 @@ pub use {aabb::AABB, bvh::BVH, hit::HitRecord, sphere::Sphere, world::World};
 pub trait Geometry: Send + Sync {
     fn normal(&self, p: &Point3) -> Vec3;
     fn material(&self) -> &dyn Material;
-    fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>>;
-    fn bbox(&self, limit: Range<f64>) -> Option<AABB>;
+    fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>>;
+    fn bbox(&self, time_limit: Range<f64>) -> Option<AABB>;
 }

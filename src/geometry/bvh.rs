@@ -35,21 +35,21 @@ fn cmp_geometry_by(axis: usize, a: &dyn Geometry, b: &dyn Geometry) -> Ordering 
 
 impl BVH {
     #[must_use]
-    pub fn new(objects: Vec<Box<dyn Geometry>>, limit: Range<f64>) -> Self {
+    pub fn new(objects: Vec<Box<dyn Geometry>>, time_limit: Range<f64>) -> Self {
         let mut objects: Vec<_> = objects.into_iter().map(Some).collect();
         let count = objects.len();
-        Self::new_internal(&mut objects, 0..count, limit)
+        Self::new_internal(&mut objects, 0..count, time_limit)
     }
 
     fn new_internal(
-        objects: &mut Vec<Option<Box<dyn Geometry>>>, index: Range<usize>, limit: Range<f64>,
+        objects: &mut Vec<Option<Box<dyn Geometry>>>, index: Range<usize>, time_limit: Range<f64>,
     ) -> Self {
         let count = index.end - index.start;
 
         if count == 1 {
             let left = objects[index.start].take().unwrap();
             let bbox = left
-                .bbox(limit)
+                .bbox(time_limit)
                 .expect("No bounding box in bvh_node constructor.");
             Self {
                 bbox,
@@ -60,10 +60,10 @@ impl BVH {
             let left = objects[index.start].take().unwrap();
             let right = objects[index.start + 1].take().unwrap();
             let left_bbox = left
-                .bbox(limit.clone())
+                .bbox(time_limit.clone())
                 .expect("No bounding box in bvh_node constructor.");
             let right_bbox = right
-                .bbox(limit)
+                .bbox(time_limit)
                 .expect("No bounding box in bvh_node constructor.");
             Self {
                 bbox: left_bbox | right_bbox,
@@ -80,8 +80,12 @@ impl BVH {
                 )
             });
             let mid = index.start + count / 2;
-            let left = Box::new(Self::new_internal(objects, index.start..mid, limit.clone()));
-            let right = Box::new(Self::new_internal(objects, mid..index.end, limit));
+            let left = Box::new(Self::new_internal(
+                objects,
+                index.start..mid,
+                time_limit.clone(),
+            ));
+            let right = Box::new(Self::new_internal(objects, mid..index.end, time_limit));
             Self {
                 bbox: &left.bbox | &right.bbox,
                 left,
@@ -101,14 +105,15 @@ impl Geometry for BVH {
         unimplemented!("BVH's material function should not be called directly")
     }
 
-    fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
-        if !self.bbox.hit(ray, limit.clone()) {
+    fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
+        if !self.bbox.hit(ray, unit_limit.clone()) {
             return None;
         }
 
-        let hit_left = self.left.hit(ray, limit.clone());
+        let hit_left = self.left.hit(ray, unit_limit.clone());
         let hit_right = self.right.as_ref().and_then(|right| {
-            let right_limit = limit.start..hit_left.as_ref().map_or(limit.end, |record| record.t);
+            let right_limit =
+                unit_limit.start..hit_left.as_ref().map_or(unit_limit.end, |record| record.t);
             right.hit(ray, right_limit)
         });
 
@@ -116,7 +121,7 @@ impl Geometry for BVH {
         hit_right.or(hit_left)
     }
 
-    fn bbox(&self, _limit: Range<f64>) -> Option<AABB> {
+    fn bbox(&self, _time_limit: Range<f64>) -> Option<AABB> {
         Some(self.bbox.clone())
     }
 }

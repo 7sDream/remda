@@ -64,7 +64,7 @@ impl<M: Material> Geometry for Sphere<M> {
     // Delta = b^2 - 4ac = 4(DL)^2 - 4 D^2 (L^2 - r2)
     // So, check (DL)^2 - D^2(L^2 - r^2)
     // root is
-    fn hit(&self, ray: &Ray, limit: Range<f64>) -> Option<HitRecord<'_>> {
+    fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         let current_center = self.center_at(ray.departure_time);
         let l = &ray.origin - current_center;
         let half_b = ray.direction.dot(&l);
@@ -79,19 +79,19 @@ impl<M: Material> Geometry for Sphere<M> {
         let sqrt = delta.sqrt();
 
         let t1 = (-half_b - sqrt) / a;
-        if limit.contains(&t1) {
+        if unit_limit.contains(&t1) {
             return Some(HitRecord::new(ray, self, t1));
         }
 
         let t2 = (-half_b + sqrt) / a;
-        if limit.contains(&t2) {
+        if unit_limit.contains(&t2) {
             return Some(HitRecord::new(ray, self, t2));
         }
 
         None
     }
 
-    fn bbox(&self, limit: Range<f64>) -> Option<AABB> {
+    fn bbox(&self, time_limit: Range<f64>) -> Option<AABB> {
         Some(
             if self.speed.x == 0.0 && self.speed.y == 0.0 && self.speed.z == 0.0 {
                 AABB::new(
@@ -100,13 +100,13 @@ impl<M: Material> Geometry for Sphere<M> {
                 )
             } else {
                 let start = AABB::new(
-                    self.center_at(limit.start) - Vec3::new(self.radius, self.radius, self.radius),
-                    self.center_at(limit.start) + Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.start) - Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.start) + Vec3::new(self.radius, self.radius, self.radius),
                 );
 
                 let end = AABB::new(
-                    self.center_at(limit.end) - Vec3::new(self.radius, self.radius, self.radius),
-                    self.center_at(limit.end) + Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.end) - Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.end) + Vec3::new(self.radius, self.radius, self.radius),
                 );
 
                 start | end

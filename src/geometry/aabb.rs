@@ -27,10 +27,11 @@ impl AABB {
     }
 
     #[must_use]
-    pub fn hit(&self, ray: &Ray, limit: Range<f64>) -> bool {
-        let mut t_min = limit.start;
-        let mut t_max = limit.end;
+    pub fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> bool {
+        let mut t_min = unit_limit.start;
+        let mut t_max = unit_limit.end;
         for i in 0..3 {
+            // TODO: when inv = Inf and min - origin = 0, the calculation will give a NaN
             let inv = 1.0 / ray.direction[i];
             let mut t0 = (self.min[i] - ray.origin[i]) * inv;
             let mut t1 = (self.max[i] - ray.origin[i]) * inv;
@@ -68,7 +69,7 @@ impl BitOr<Self> for &AABB {
 }
 
 impl BitOr<Self> for AABB {
-    type Output = AABB;
+    type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
         &self | &rhs
@@ -76,7 +77,7 @@ impl BitOr<Self> for AABB {
 }
 
 impl BitOr<&Self> for AABB {
-    type Output = AABB;
+    type Output = Self;
 
     fn bitor(self, rhs: &Self) -> Self::Output {
         &self | rhs
@@ -92,7 +93,7 @@ impl BitOr<AABB> for &AABB {
 }
 
 impl BitOrAssign<&Self> for AABB {
-    fn bitor_assign(&mut self, rhs: &AABB) {
+    fn bitor_assign(&mut self, rhs: &Self) {
         self.min = Point3::new(
             self.min.x.min(rhs.min.x),
             self.min.y.min(rhs.min.y),
@@ -108,7 +109,7 @@ impl BitOrAssign<&Self> for AABB {
 }
 
 impl BitOrAssign<Self> for AABB {
-    fn bitor_assign(&mut self, rhs: AABB) {
+    fn bitor_assign(&mut self, rhs: Self) {
         *self |= &rhs
     }
 }

@@ -1,6 +1,5 @@
-use crate::geometry::AABB;
 use {
-    super::{Geometry, HitRecord, BVH},
+    super::{Geometry, HitRecord, AABB, BVH},
     crate::{material::Material, prelude::*},
     std::{
         fmt::{Debug, Formatter},
@@ -8,53 +7,43 @@ use {
     },
 };
 
-#[derive(Default)]
+pub fn default_background(ray: &Ray) -> Color {
+    let unit = ray.direction.unit();
+    let t = 0.5 * (unit.y + 1.0);
+    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+}
+
 pub struct World {
-    background: Option<Box<dyn Fn(&Ray) -> Color + Send + Sync>>,
-    objects: Vec<Box<dyn Geometry>>,
+    bvh: BVH,
+    bg_func: Box<dyn Fn(&Ray) -> Color + Send + Sync>,
 }
 
 impl Debug for World {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("World {{ objects: {}}}", self.objects.len()))
+        f.write_str("World {}")
     }
 }
 
 impl World {
-    pub fn add<G: Geometry + 'static>(&mut self, object: G) -> &mut Self {
-        let object: Box<dyn Geometry> = Box::new(object);
-        self.objects.push(object);
-        self
-    }
-
-    pub fn add_ref(&mut self, object: Box<dyn Geometry>) -> &mut Self {
-        self.objects.push(object);
-        self
-    }
-
-    pub fn clear(&mut self) {
-        self.objects.clear();
+    #[must_use]
+    pub fn new(bvh: BVH) -> Self {
+        Self {
+            bvh,
+            bg_func: Box::new(default_background),
+        }
     }
 
     pub fn set_bg<F>(&mut self, f: F)
     where
         F: Fn(&Ray) -> Color + Send + Sync + 'static,
     {
-        self.background = Some(Box::new(f));
+        self.bg_func = Box::new(f);
     }
 
     #[must_use]
     pub fn background(&self, ray: &Ray) -> Color {
-        if let Some(f) = &self.background {
-            f(ray)
-        } else {
-            Color::default()
-        }
-    }
-
-    #[must_use]
-    pub fn into_bvh(self, time_limit: Range<f64>) -> BVH {
-        BVH::new(self.objects, time_limit)
+        let f = &self.bg_func;
+        f(ray)
     }
 }
 
@@ -67,25 +56,11 @@ impl Geometry for World {
         unimplemented!("World's material function should not be called directly")
     }
 
-    fn hit(&self, r: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
-        self.objects
-            .iter()
-            .filter_map(|object| object.hit(r, unit_limit.clone()))
-            .min_by(|r1, r2| r1.t.partial_cmp(&r2.t).unwrap())
+    fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
+        self.bvh.hit(ray, unit_limit)
     }
 
     fn bbox(&self, time_limit: Range<f64>) -> Option<AABB> {
-        if self.objects.is_empty() {
-            return None;
-        }
-
-        let mut result: Option<AABB> = None;
-
-        for object in &self.objects {
-            let bbox = object.bbox(time_limit.clone())?;
-            result = result.map(|last| last | &bbox).or_else(|| Some(bbox))
-        }
-
-        result
+        self.bvh.bbox(time_limit)
     }
 }

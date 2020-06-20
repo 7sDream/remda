@@ -1,5 +1,5 @@
 use {
-    crate::geometry::{Geometry, World},
+    crate::geometry::{Geometry, GeometryList, World},
     crate::image::Painter,
     crate::prelude::*,
     std::path::Path,
@@ -60,15 +60,16 @@ impl Camera {
     }
 
     #[must_use]
-    pub const fn take_photo<'i, 'w>(&'i self, world: &'w World) -> TakePhotoSettings<'i, 'w> {
+    pub fn take_photo(&self, world: GeometryList) -> TakePhotoSettings<'_> {
+        let world = world.build(0.0..self.shutter_speed);
         TakePhotoSettings::new(self, world)
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct TakePhotoSettings<'c, 'w> {
+#[derive(Debug)]
+pub struct TakePhotoSettings<'c> {
     camera: &'c Camera,
-    world: &'w World,
+    world: World,
     depth: usize,
     picture_height: usize,
     gamma: bool,
@@ -77,9 +78,9 @@ pub struct TakePhotoSettings<'c, 'w> {
     parallel: bool,
 }
 
-impl<'c, 'w> TakePhotoSettings<'c, 'w> {
+impl<'c> TakePhotoSettings<'c> {
     #[must_use]
-    pub const fn new(camera: &'c Camera, world: &'w World) -> Self {
+    pub const fn new(camera: &'c Camera, world: World) -> Self {
         Self {
             camera,
             world,
@@ -90,6 +91,11 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
             threads: 0,
             parallel: true,
         }
+    }
+
+    pub fn background<BG: Fn(&Ray) -> Color + Send + Sync + 'static>(mut self, bg: BG) -> Self {
+        self.world.set_bg(bg);
+        self
     }
 
     #[must_use]
@@ -163,7 +169,7 @@ impl<'c, 'w> TakePhotoSettings<'c, 'w> {
         .parallel(self.parallel)
         .draw(&path, |u, v| -> Vec3 {
             let ray = self.camera.ray(u, v);
-            Self::ray_color(&ray, self.world, self.depth).into()
+            Self::ray_color(&ray, &self.world, self.depth).into()
         })
     }
 }

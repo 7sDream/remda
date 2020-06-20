@@ -14,9 +14,9 @@ fn main() {
     let (camera, world) = common::ray_tracing_in_one_weekend::final_scene(Some(7));
 
     camera
-        .take_photo(&world)
-        .height(100)
-        .samples(100)
+        .take_photo(world)
+        .height(1080)
+        .samples(512)
         .shot(Some("rtow_13_1.ppm"))
         .unwrap();
 }

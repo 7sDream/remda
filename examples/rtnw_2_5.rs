@@ -14,7 +14,7 @@ fn main() {
     let (camera, world) = common::ray_tracing_next_week::motion_blur(Some(77));
 
     camera
-        .take_photo(&world)
+        .take_photo(world)
         .height(100)
         .samples(100)
         .shot(Some("rtnw_2_5.ppm"))

@@ -1,12 +1,17 @@
-mod aabb;
-mod bvh;
-mod hit;
-mod sphere;
-mod world;
+pub(crate) mod aabb;
+pub(crate) mod bvh;
+pub(crate) mod hit;
+pub mod list;
+pub mod sphere;
+pub mod world;
 
-use {crate::material::Material, crate::prelude::*, std::ops::Range};
+use {
+    crate::{material::Material, prelude::*},
+    std::ops::Range,
+};
 
-pub use {aabb::AABB, bvh::BVH, hit::HitRecord, sphere::Sphere, world::World};
+pub(crate) use {aabb::AABB, bvh::BVH, hit::HitRecord};
+pub use {list::GeometryList, sphere::Sphere, world::World};
 
 pub trait Geometry: Send + Sync {
     fn normal(&self, p: &Point3) -> Vec3;

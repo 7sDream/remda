@@ -1,11 +1,11 @@
 use remda::{
     camera::{Camera, CameraBuilder},
-    geometry::{Sphere, World},
+    geometry::{GeometryList, Sphere},
     material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
 };
 
-fn add_small_balls(world: &mut World, rng: &mut SeedRandom, need_speed: bool) {
+fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: bool) {
     let small_ball_radius = 0.2;
     let mut avoid = Point3::new(0.0, 0.2, 0.0);
     for a in -11..11 {
@@ -51,7 +51,7 @@ fn add_small_balls(world: &mut World, rng: &mut SeedRandom, need_speed: bool) {
     }
 }
 
-fn add_big_balls(world: &mut World) {
+fn add_big_balls(world: &mut GeometryList) {
     world.add(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
@@ -72,16 +72,11 @@ fn add_big_balls(world: &mut World) {
 }
 
 #[must_use]
-pub fn world(seed: Option<u64>, need_speed: bool) -> World {
-    let mut world = World::default();
-    world.set_bg(|ray| {
-        let unit = ray.direction.unit();
-        let t = 0.5 * (unit.y + 1.0);
-        Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
-    });
+pub fn world(seed: Option<u64>, need_speed: bool) -> GeometryList {
+    let mut list = GeometryList::default();
 
     // Ground
-    world.add(Sphere::new(
+    list.add(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
         Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
@@ -93,10 +88,10 @@ pub fn world(seed: Option<u64>, need_speed: bool) -> World {
         SeedRandom::random()
     };
 
-    add_small_balls(&mut world, &mut rng, need_speed);
-    add_big_balls(&mut world);
+    add_small_balls(&mut list, &mut rng, need_speed);
+    add_big_balls(&mut list);
 
-    world
+    list
 }
 
 #[must_use]

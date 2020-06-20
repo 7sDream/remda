@@ -1,4 +1,4 @@
-use remda::{camera::CameraBuilder, geometry::World, prelude::*};
+use remda::{camera::CameraBuilder, geometry::GeometryList, prelude::*};
 
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<(f64, Vec3)> {
     let oc = &ray.origin - center;
@@ -25,26 +25,27 @@ fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<(f64, Vec3)> {
     }
 }
 
+fn background(ray: &Ray) -> Color {
+    let ts = vec![
+        hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray),
+        hit_sphere(&Point3::new(0.0, -100.5, -1.0), 100.0, ray),
+    ];
+    if let Some((_, n)) = ts
+        .into_iter()
+        .flatten()
+        .min_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
+    {
+        return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color(1, false);
+    }
+    let unit = ray.direction.unit();
+    let t = 0.5 * (unit.y + 1.0);
+    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+}
+
 fn main() {
     env_logger::init();
 
-    let mut world = World::default();
-    world.set_bg(|ray| {
-        let ts = vec![
-            hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray),
-            hit_sphere(&Point3::new(0.0, -100.5, -1.0), 100.0, ray),
-        ];
-        if let Some((_, n)) = ts
-            .into_iter()
-            .flatten()
-            .min_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
-        {
-            return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color(1, false);
-        }
-        let unit = ray.direction.unit();
-        let t = 0.5 * (unit.y + 1.0);
-        Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
-    });
+    let world = GeometryList::default();
 
     let camera = CameraBuilder::default()
         .look_from(Point3::new(-0.5, 0.0, -0.7))
@@ -53,7 +54,8 @@ fn main() {
         .build();
 
     camera
-        .take_photo(&world)
+        .take_photo(world)
+        .background(background)
         .height(36)
         .gamma(false)
         .samples(100)

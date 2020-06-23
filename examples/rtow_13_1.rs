@@ -15,8 +15,8 @@ fn main() {
 
     camera
         .take_photo(world)
-        .height(1080)
-        .samples(512)
+        .height(108)
+        .samples(128)
         .shot(Some("rtow_13_1.ppm"))
         .unwrap();
 }

@@ -52,11 +52,15 @@ impl Geometry for GeometryList {
         unimplemented!("GeometryList's material function should not be called directly")
     }
 
+    fn uv(&self, _point: &Point3) -> (f64, f64) {
+        unimplemented!("GeometryList's uv function should not be called directly")
+    }
+
     fn hit(&self, r: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.objects
             .iter()
             .filter_map(|object| object.hit(r, unit_limit.clone()))
-            .min_by(|r1, r2| r1.t.partial_cmp(&r2.t).unwrap())
+            .min_by(|r1, r2| r1.unit.partial_cmp(&r2.unit).unwrap())
     }
 
     fn bbox(&self, time_limit: Range<f64>) -> Option<AABB> {

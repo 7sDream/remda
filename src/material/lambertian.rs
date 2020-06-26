@@ -1,6 +1,6 @@
 use {
     super::{Material, ScatterRecord},
-    crate::{geometry::HitRecord, prelude::*},
+    crate::{geometry::HitRecord, prelude::*, texture::Texture},
 };
 
 #[derive(Debug)]
@@ -34,32 +34,33 @@ impl LambertianMathType {
 }
 
 #[derive(Debug)]
-pub struct Lambertian {
-    color: Color,
+pub struct Lambertian<T: Texture> {
+    texture: T,
     math_type: LambertianMathType,
 }
 
-impl Lambertian {
+impl<T: Texture> Lambertian<T> {
     #[must_use]
-    pub const fn new(color: Color) -> Self {
+    pub fn new(texture: T) -> Self {
         Self {
-            color,
+            texture,
             math_type: LambertianMathType::True,
         }
     }
 
     #[must_use]
-    pub const fn math_type(mut self, value: LambertianMathType) -> Self {
+    pub fn math_type(mut self, value: LambertianMathType) -> Self {
         self.math_type = value;
         self
     }
 }
 
-impl Material for Lambertian {
+impl<T: Texture> Material for Lambertian<T> {
     fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<super::ScatterRecord> {
+        let color = self.texture.color(hit.u, hit.v, &hit.point);
         let new_ray = self.math_type.scatter_ray(ray, hit);
         Some(ScatterRecord {
-            color: self.color.clone(),
+            color,
             ray: new_ray,
         })
     }

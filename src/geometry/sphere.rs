@@ -54,6 +54,14 @@ impl<M: Material> Geometry for Sphere<M> {
         &self.material
     }
 
+    fn uv(&self, point: &Point3) -> (f64, f64) {
+        let phi = (-point.z).atan2(point.x); // [-pi, pi]
+        let theta = point.y.asin(); // [-pi / 2 , pi / 2]
+        let u = phi / 2.0 / PI + 0.5;
+        let v = theta / PI + 0.5;
+        (u, v)
+    }
+
     // Ray(t) = O + tD
     // Sphere surface = (X - C)^2 = r^2
     // (O + tD - C)^2 = r^2
@@ -100,13 +108,17 @@ impl<M: Material> Geometry for Sphere<M> {
                 )
             } else {
                 let start = AABB::new(
-                    self.center_at(time_limit.start) - Vec3::new(self.radius, self.radius, self.radius),
-                    self.center_at(time_limit.start) + Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.start)
+                        - Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.start)
+                        + Vec3::new(self.radius, self.radius, self.radius),
                 );
 
                 let end = AABB::new(
-                    self.center_at(time_limit.end) - Vec3::new(self.radius, self.radius, self.radius),
-                    self.center_at(time_limit.end) + Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.end)
+                        - Vec3::new(self.radius, self.radius, self.radius),
+                    self.center_at(time_limit.end)
+                        + Vec3::new(self.radius, self.radius, self.radius),
                 );
 
                 start | end

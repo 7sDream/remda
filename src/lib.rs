@@ -8,5 +8,6 @@ pub mod geometry;
 pub mod image;
 pub mod material;
 pub mod prelude;
+pub mod texture;
 
 mod internal;

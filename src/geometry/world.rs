@@ -56,6 +56,10 @@ impl Geometry for World {
         unimplemented!("World's material function should not be called directly")
     }
 
+    fn uv(&self, _point: &Point3) -> (f64, f64) {
+        unimplemented!("World's uv function should not be called directly")
+    }
+
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.bvh.hit(ray, unit_limit)
     }

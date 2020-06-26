@@ -110,6 +110,10 @@ impl Geometry for BVH {
         unimplemented!("BVH's material function should not be called directly")
     }
 
+    fn uv(&self, _point: &Point3) -> (f64, f64) {
+        unimplemented!("BVH's uv function should not be called directly")
+    }
+
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         let bbox = self.bbox.as_ref()?;
         if !bbox.hit(ray, unit_limit.clone()) {
@@ -121,8 +125,10 @@ impl Geometry for BVH {
             .as_ref()
             .and_then(|left| left.hit(ray, unit_limit.clone()));
         let hit_right = self.right.as_ref().and_then(|right| {
-            let right_limit =
-                unit_limit.start..hit_left.as_ref().map_or(unit_limit.end, |record| record.t);
+            let right_limit = unit_limit.start
+                ..hit_left
+                    .as_ref()
+                    .map_or(unit_limit.end, |record| record.unit);
             right.hit(ray, right_limit)
         });
 

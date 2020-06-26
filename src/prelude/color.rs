@@ -1,5 +1,7 @@
+use crate::prelude::Point3;
 use {
     super::clamp,
+    crate::texture::Texture,
     std::{borrow::Cow, ops::Mul},
 };
 
@@ -103,6 +105,12 @@ impl Color {
         let c1 = a.f();
         let c2 = b.f();
         Self::newf(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b)
+    }
+}
+
+impl Texture for Color {
+    fn color(&self, _u: f64, _v: f64, _point: &Point3) -> Color {
+        self.clone()
     }
 }
 

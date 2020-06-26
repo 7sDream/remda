@@ -1,18 +1,18 @@
 use {
     super::{Material, ScatterRecord},
-    crate::{geometry::HitRecord, prelude::*},
+    crate::{geometry::HitRecord, prelude::*, texture::Texture},
 };
 
 #[derive(Debug)]
-pub struct Metal {
-    color: Color,
+pub struct Metal<T: Texture> {
+    texture: T,
     fuzz: f64,
 }
 
-impl Metal {
+impl<T: Texture> Metal<T> {
     #[must_use]
-    pub const fn new(color: Color) -> Self {
-        Self { color, fuzz: 0.0 }
+    pub fn new(texture: T) -> Self {
+        Self { texture, fuzz: 0.0 }
     }
 
     #[must_use]
@@ -29,12 +29,13 @@ impl Metal {
     }
 }
 
-impl Material for Metal {
+impl<T: Texture> Material for Metal<T> {
     fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<ScatterRecord> {
+        let color = self.texture.color(hit.u, hit.v, &hit.point);
         let reflected = self.reflect(ray, &hit);
         if reflected.direction.dot(&hit.normal) > 0.0 {
             Some(ScatterRecord {
-                color: self.color.clone(),
+                color,
                 ray: reflected,
             })
         } else {

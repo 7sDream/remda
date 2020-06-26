@@ -31,14 +31,14 @@ impl<'m> HitRecord<'m> {
             normal.reverse();
         }
         let material = object.material();
+        let (u, v) = object.uv(&point);
         Self {
             point,
             normal,
             material,
             unit,
-            // TODO: Fill u v value
-            u: 0.0,
-            v: 0.0,
+            u,
+            v,
             outside,
         }
     }

@@ -24,7 +24,7 @@ Yet another simple and pure software ray tracing renderer.
 - [ ] [《Ray Tracing: The Next Week》][book-2]
     - [x] Motion Blur
     - [x] BVH(Bounding Volume Hierarchies)
-    - [ ] Solid Textures
+    - [x] Solid Textures
     - [ ] Perlin Noise
     - [ ] Image Textures
     - [ ] Rectangles

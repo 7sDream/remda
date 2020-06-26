@@ -5,7 +5,7 @@ use {
 
 #[must_use]
 fn final_world(seed: Option<u64>) -> GeometryList {
-    common::world(seed, false)
+    common::world(seed, false, false)
 }
 
 #[must_use]

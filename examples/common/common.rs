@@ -3,6 +3,7 @@ use remda::{
     geometry::{GeometryList, Sphere},
     material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
+    texture::Checker,
 };
 
 fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: bool) {
@@ -72,15 +73,27 @@ fn add_big_balls(world: &mut GeometryList) {
 }
 
 #[must_use]
-pub fn world(seed: Option<u64>, need_speed: bool) -> GeometryList {
+pub fn world(seed: Option<u64>, need_speed: bool, checker: bool) -> GeometryList {
     let mut list = GeometryList::default();
 
+    if checker {
+        list.add(Sphere::new(
+            Point3::new(0.0, -1000.0, 0.0),
+            1000.0,
+            Lambertian::new(Checker::new(
+                Color::newf(0.2, 0.3, 0.1),
+                Color::newf(0.9, 0.9, 0.9),
+            )),
+        ));
+    } else {
+        list.add(Sphere::new(
+            Point3::new(0.0, -1000.0, 0.0),
+            1000.0,
+            Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
+        ));
+    };
+
     // Ground
-    list.add(Sphere::new(
-        Point3::new(0.0, -1000.0, 0.0),
-        1000.0,
-        Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
-    ));
 
     let mut rng = if let Some(seed) = seed {
         SeedRandom::new(seed)

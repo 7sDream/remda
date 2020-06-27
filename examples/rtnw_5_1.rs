@@ -3,23 +3,23 @@ use remda::{
     geometry::{GeometryList, Sphere},
     material::Lambertian,
     prelude::*,
-    texture::Checker,
+    texture::Perlin,
 };
 
 fn main() {
     let mut world = GeometryList::default();
-    let checker = Checker::new(Color::newf(0.2, 0.3, 0.1), Color::newf(0.9, 0.9, 0.9));
+    let perlin = Perlin::new(256);
 
     world
         .add(Sphere::new(
-            Point3::new(0.0, -10.0, 0.0),
-            10.0,
-            Lambertian::new(checker.clone()),
+            Point3::new(0.0, -1000.0, 0.0),
+            1000.0,
+            Lambertian::new(perlin.clone()),
         ))
         .add(Sphere::new(
-            Point3::new(0.0, 10.0, 0.0),
-            10.0,
-            Lambertian::new(checker),
+            Point3::new(0.0, 2.0, 0.0),
+            2.0,
+            Lambertian::new(perlin),
         ));
 
     let camera = CameraBuilder::default()
@@ -34,6 +34,6 @@ fn main() {
         .take_photo(world)
         .height(300)
         .samples(128)
-        .shot(Some("rtnw_4_4.ppm"))
+        .shot(Some("rtnw_5_1.ppm"))
         .unwrap();
 }

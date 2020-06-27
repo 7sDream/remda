@@ -1,6 +1,8 @@
-use rand::RngCore;
 use {
-    rand::{rngs::StdRng, Rng, SeedableRng},
+    rand::{
+        distributions::uniform::SampleUniform, rngs::StdRng, seq::SliceRandom, thread_rng, Rng,
+        RngCore, SeedableRng,
+    },
     std::ops::Range,
 };
 
@@ -10,15 +12,20 @@ fn normal<R: Rng>(mut rng: R) -> f64 {
 }
 
 #[must_use]
-fn range<R: Rng>(mut rng: R, r: Range<f64>) -> f64 {
+fn range<R: Rng, T: SampleUniform>(mut rng: R, r: Range<T>) -> T {
     rng.gen_range(r.start, r.end)
 }
 
 fn choose<T, R: Rng, S: AsRef<[T]>>(mut rng: R, values: &S) -> &T {
     let slice = values.as_ref();
-    assert!(slice.len() > 0);
+    assert!(!slice.is_empty());
     let index = rng.gen_range(0, slice.len());
     &slice[index]
+}
+
+fn shuffle<T, R: Rng, S: AsMut<[T]>>(mut rng: R, values: &mut S) {
+    let slice = values.as_mut();
+    slice.shuffle(&mut rng);
 }
 
 #[derive(Debug)]
@@ -27,16 +34,20 @@ pub struct Random();
 impl Random {
     #[must_use]
     pub fn normal() -> f64 {
-        normal(rand::thread_rng())
+        normal(thread_rng())
     }
 
     #[must_use]
-    pub fn range(r: Range<f64>) -> f64 {
-        range(rand::thread_rng(), r)
+    pub fn range<T: SampleUniform>(r: Range<T>) -> T {
+        range(thread_rng(), r)
     }
 
     pub fn choose<T, S: AsRef<[T]>>(values: &S) -> &T {
-        choose(rand::thread_rng(), values)
+        choose(thread_rng(), values)
+    }
+
+    pub fn shuffle<T, S: AsMut<[T]>>(values: &mut S) {
+        shuffle(thread_rng(), values)
     }
 }
 
@@ -58,11 +69,15 @@ impl SeedRandom {
         normal(&mut self.0)
     }
 
-    pub fn range(&mut self, r: Range<f64>) -> f64 {
+    pub fn range<T: SampleUniform>(&mut self, r: Range<T>) -> T {
         range(&mut self.0, r)
     }
 
     pub fn choose<'i, 's, T, S: AsRef<[T]>>(&'i mut self, values: &'s S) -> &'s T {
         choose(&mut self.0, values)
+    }
+
+    pub fn shuffle<T, S: AsMut<[T]>>(&mut self, values: &mut S) {
+        shuffle(&mut self.0, values)
     }
 }

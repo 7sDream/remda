@@ -7,6 +7,7 @@ use {
     },
 };
 
+#[must_use]
 pub fn default_background(ray: &Ray) -> Color {
     let unit = ray.direction.unit();
     let t = 0.5 * (unit.y + 1.0);

@@ -65,8 +65,8 @@ impl Vec3 {
 
     #[must_use]
     pub fn random_unit() -> Self {
-        let a = Random::range(0.0..(2.0 * PI));
-        let z = Random::range(-1.0..1.0);
+        let a: f64 = Random::range(0.0..(2.0 * PI));
+        let z: f64 = Random::range(-1.0..1.0);
         let r = (1.0 - z * z).sqrt();
         Self::new(r * a.cos(), r * a.sin(), z)
     }

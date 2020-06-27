@@ -8,7 +8,7 @@ use remda::{
 
 fn main() {
     let mut world = GeometryList::default();
-    let perlin = Perlin::new(256, SmoothType::None);
+    let perlin = Perlin::new(256, SmoothType::Hermitian).scale(4.0);
 
     world
         .add(Sphere::new(
@@ -34,6 +34,6 @@ fn main() {
         .take_photo(world)
         .height(300)
         .samples(128)
-        .shot(Some("rtnw_5_1.ppm"))
+        .shot(Some("rtnw_5_4.ppm"))
         .unwrap();
 }

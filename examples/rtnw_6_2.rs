@@ -8,7 +8,7 @@ use remda::{
 
 fn main() {
     let mut world = GeometryList::default();
-    // Image comes from https://en.wikipedia.org/wiki/Equirectangular_projection
+    // Image comes from http://visibleearth.nasa.gov/view.php?id=57752
     let earth_texture = Image::new("examples/earthmap.png").unwrap();
 
     world

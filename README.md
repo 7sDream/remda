@@ -58,9 +58,14 @@ You can also try other examples if you want.
 
 GPLv3
 
+Except: 
+
+- `example/earthmap.png`, download from [NASA][earth-map-source], fall in public domain
+
 [book-series]: https://raytracing.github.io/
 [book-1]: https://raytracing.github.io/books/RayTracingInOneWeekend.html
 [book-2]: https://raytracing.github.io/books/RayTracingTheNextWeek.html
 [book-3]: https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 [screenshot]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
 [rayon-crates-io]: https://crates.io/crates/rayon
+[earth-map-source]: http://visibleearth.nasa.gov/view.php?id=57752

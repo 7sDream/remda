@@ -16,6 +16,7 @@ pub struct Perlin {
     perm_x: Vec<usize>,
     perm_y: Vec<usize>,
     perm_z: Vec<usize>,
+    turbulence: Option<u8>,
 }
 
 #[derive(Debug, Clone)]
@@ -56,6 +57,7 @@ impl Perlin {
             perm_x,
             perm_y,
             perm_z,
+            turbulence: None,
         }
     }
 
@@ -63,6 +65,70 @@ impl Perlin {
     pub const fn scale(mut self, scale: f64) -> Self {
         self.scale = scale;
         self
+    }
+
+    #[must_use]
+    pub const fn turbulence(mut self, depth: u8) -> Self {
+        self.turbulence = Some(depth);
+        self
+    }
+
+    #[allow(clippy::cast_sign_loss)] // because we bit and with positive number before cast
+    #[allow(clippy::cast_possible_wrap)] // because di dj dk and point_count is small enough
+    #[allow(clippy::cast_precision_loss)] // scene is not so big
+    #[allow(clippy::many_single_char_names)]
+    fn noise(&self, point: &Point3) -> f64 {
+        match self.smooth {
+            SmoothType::None => {
+                let i = (((4.0 * point.x) as isize) & (self.point_count - 1) as isize) as usize;
+                let j = (((4.0 * point.y) as isize) & (self.point_count - 1) as isize) as usize;
+                let k = (((4.0 * point.z) as isize) & (self.point_count - 1) as isize) as usize;
+
+                match &self.ran[self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]] {
+                    RanType::Vector(v) => v.x,
+                    RanType::Float(x) => *x,
+                }
+            }
+            SmoothType::Interp | SmoothType::Hermitian => {
+                let i = point.x.floor() as isize;
+                let j = point.y.floor() as isize;
+                let k = point.z.floor() as isize;
+                let u = point.x - i as f64;
+                let v = point.y - j as f64;
+                let w = point.z - k as f64;
+
+                let mut grays: [[[RanType; 2]; 2]; 2] = Default::default();
+
+                (0..2).for_each(|di| {
+                    (0..2).for_each(|dj| {
+                        (0..2).for_each(|dk| {
+                            let xi = ((i + di as isize) & (self.point_count - 1) as isize) as usize;
+                            let yi = ((j + dj as isize) & (self.point_count - 1) as isize) as usize;
+                            let zi = ((k + dk as isize) & (self.point_count - 1) as isize) as usize;
+                            let index = self.perm_x[xi] ^ self.perm_y[yi] ^ self.perm_z[zi];
+                            grays[di][dj][dk] = self.ran[index].clone();
+                        })
+                    })
+                });
+
+                interp(&grays, u, v, w, &self.smooth)
+            }
+        }
+    }
+
+    fn turb(&self, point: &Point3) -> f64 {
+        let mut p = point.clone();
+        let mut weight = 1.0;
+
+        (0..self.turbulence.unwrap())
+            .map(|_| {
+                let res = weight * self.noise(&p);
+                weight *= 0.5;
+                p *= 2.0;
+                res
+            })
+            .sum::<f64>()
+            .abs()
     }
 }
 
@@ -75,7 +141,7 @@ fn interp(c: &[[[RanType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothTyp
         ww = w * w * (3.0 - 2.0 * w);
     }
 
-    let mut acc: f64 = (0..2)
+    (0..2)
         .map(|i| {
             (0..2)
                 .map(|j| {
@@ -97,59 +163,22 @@ fn interp(c: &[[[RanType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothTyp
                 })
                 .sum::<f64>()
         })
-        .sum::<f64>();
-    if let RanType::Vector(_) = &c[0][0][0] {
-        acc = 0.5 * (acc + 1.0);
-    }
-    acc
+        .sum()
 }
 
 impl Texture for Perlin {
-    #[allow(clippy::cast_sign_loss)] // because we bit and with positive number before cast
-    #[allow(clippy::cast_possible_wrap)] // because di dj dk and point_count is small enough
-    #[allow(clippy::cast_precision_loss)] // scene is not so big
-    #[allow(clippy::many_single_char_names)]
     fn color(&self, _u: f64, _v: f64, point: &Point3) -> Color {
-        let point = point * self.scale;
         Color::newf(1.0, 1.0, 1.0)
-            * match self.smooth {
-                SmoothType::None => {
-                    let i = (((4.0 * point.x) as isize) & (self.point_count - 1) as isize) as usize;
-                    let j = (((4.0 * point.y) as isize) & (self.point_count - 1) as isize) as usize;
-                    let k = (((4.0 * point.z) as isize) & (self.point_count - 1) as isize) as usize;
+            * if self.turbulence.is_some() {
+                self.turb(point)
+            } else {
+                let p = self.scale * point;
+                let mut noise = self.noise(&p);
 
-                    match &self.ran[self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]] {
-                        RanType::Vector(v) => v.x,
-                        RanType::Float(x) => *x,
-                    }
+                if let RanType::Vector(_) = &self.ran[0] {
+                    noise = 0.5 * (noise + 1.0);
                 }
-                SmoothType::Interp | SmoothType::Hermitian => {
-                    let i = point.x.floor() as isize;
-                    let j = point.y.floor() as isize;
-                    let k = point.z.floor() as isize;
-                    let u = point.x - i as f64;
-                    let v = point.y - j as f64;
-                    let w = point.z - k as f64;
-
-                    let mut grays: [[[RanType; 2]; 2]; 2] = Default::default();
-
-                    (0..2).for_each(|di| {
-                        (0..2).for_each(|dj| {
-                            (0..2).for_each(|dk| {
-                                let xi =
-                                    ((i + di as isize) & (self.point_count - 1) as isize) as usize;
-                                let yi =
-                                    ((j + dj as isize) & (self.point_count - 1) as isize) as usize;
-                                let zi =
-                                    ((k + dk as isize) & (self.point_count - 1) as isize) as usize;
-                                let index = self.perm_x[xi] ^ self.perm_y[yi] ^ self.perm_z[zi];
-                                grays[di][dj][dk] = self.ran[index].clone();
-                            })
-                        })
-                    });
-
-                    interp(&grays, u, v, w, &self.smooth)
-                }
+                noise
             }
     }
 }

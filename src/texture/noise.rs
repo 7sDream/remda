@@ -7,22 +7,29 @@ pub enum SmoothType {
     Hermitian,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+enum TextureType {
+    Normal,
+    Turbulence(u8),
+    Marble(u8),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum RanType {
+    Float(f64),
+    Vector(Vec3),
+}
+
 #[derive(Debug, Clone)]
 pub struct Perlin {
+    texture_type: TextureType,
+    smooth_type: SmoothType,
     point_count: usize,
     scale: f64,
-    smooth: SmoothType,
     ran: Vec<RanType>,
     perm_x: Vec<usize>,
     perm_y: Vec<usize>,
     perm_z: Vec<usize>,
-    turbulence: Option<u8>,
-}
-
-#[derive(Debug, Clone)]
-enum RanType {
-    Float(f64),
-    Vector(Vec3),
 }
 
 impl Default for RanType {
@@ -33,8 +40,8 @@ impl Default for RanType {
 
 impl Perlin {
     #[must_use]
-    pub fn new(point_count: usize, vector: bool, smooth: SmoothType) -> Self {
-        let ran_float = (0..point_count)
+    pub fn new(point_count: usize, vector: bool) -> Self {
+        let ran = (0..point_count)
             .map(|_| {
                 if vector {
                     RanType::Vector(Vec3::random_unit())
@@ -50,14 +57,14 @@ impl Perlin {
         let mut perm_z = (0..point_count).collect();
         Random::shuffle(&mut perm_z);
         Self {
+            texture_type: TextureType::Normal,
+            smooth_type: SmoothType::Hermitian,
             point_count,
             scale: 1.0,
-            smooth,
-            ran: ran_float,
+            ran,
             perm_x,
             perm_y,
             perm_z,
-            turbulence: None,
         }
     }
 
@@ -68,8 +75,20 @@ impl Perlin {
     }
 
     #[must_use]
+    pub const fn smooth(mut self, smooth: SmoothType) -> Self {
+        self.smooth_type = smooth;
+        self
+    }
+
+    #[must_use]
     pub const fn turbulence(mut self, depth: u8) -> Self {
-        self.turbulence = Some(depth);
+        self.texture_type = TextureType::Turbulence(depth);
+        self
+    }
+
+    #[must_use]
+    pub const fn marble(mut self, depth: u8) -> Self {
+        self.texture_type = TextureType::Marble(depth);
         self
     }
 
@@ -78,7 +97,7 @@ impl Perlin {
     #[allow(clippy::cast_precision_loss)] // scene is not so big
     #[allow(clippy::many_single_char_names)]
     fn noise(&self, point: &Point3) -> f64 {
-        match self.smooth {
+        match self.smooth_type {
             SmoothType::None => {
                 let i = (((4.0 * point.x) as isize) & (self.point_count - 1) as isize) as usize;
                 let j = (((4.0 * point.y) as isize) & (self.point_count - 1) as isize) as usize;
@@ -111,16 +130,16 @@ impl Perlin {
                     })
                 });
 
-                interp(&grays, u, v, w, &self.smooth)
+                interp(&grays, u, v, w, &self.smooth_type)
             }
         }
     }
 
-    fn turb(&self, point: &Point3) -> f64 {
+    fn turb(&self, point: &Point3, depth: usize) -> f64 {
         let mut p = point.clone();
         let mut weight = 1.0;
 
-        (0..self.turbulence.unwrap())
+        (0..depth)
             .map(|_| {
                 let res = weight * self.noise(&p);
                 weight *= 0.5;
@@ -169,16 +188,21 @@ fn interp(c: &[[[RanType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothTyp
 impl Texture for Perlin {
     fn color(&self, _u: f64, _v: f64, point: &Point3) -> Color {
         Color::newf(1.0, 1.0, 1.0)
-            * if self.turbulence.is_some() {
-                self.turb(point)
-            } else {
-                let p = self.scale * point;
-                let mut noise = self.noise(&p);
+            * match &self.texture_type {
+                TextureType::Normal => {
+                    let p = self.scale * point;
+                    let mut noise = self.noise(&p);
 
-                if let RanType::Vector(_) = &self.ran[0] {
-                    noise = 0.5 * (noise + 1.0);
+                    if let RanType::Vector(_) = &self.ran[0] {
+                        noise = 0.5 * (noise + 1.0);
+                    }
+                    noise
                 }
-                noise
+                TextureType::Turbulence(depth) => self.turb(point, *depth as usize),
+                TextureType::Marble(depth) => {
+                    let noise = self.turb(point, *depth as usize);
+                    (self.scale.mul_add(point.z, 10.0 * noise).sin() + 1.0) * 0.5
+                }
             }
     }
 }

@@ -8,7 +8,7 @@ use remda::{
 
 fn main() {
     let mut world = GeometryList::default();
-    let perlin = Perlin::new(256, false, SmoothType::None);
+    let perlin = Perlin::new(256, false).smooth(SmoothType::None);
 
     world
         .add(Sphere::new(

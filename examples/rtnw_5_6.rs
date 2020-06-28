@@ -3,12 +3,12 @@ use remda::{
     geometry::{GeometryList, Sphere},
     material::Lambertian,
     prelude::*,
-    texture::{Perlin, SmoothType},
+    texture::Perlin,
 };
 
 fn main() {
     let mut world = GeometryList::default();
-    let perlin = Perlin::new(256, true, SmoothType::Hermitian).turbulence(7);
+    let perlin = Perlin::new(256, true).turbulence(7);
 
     world
         .add(Sphere::new(

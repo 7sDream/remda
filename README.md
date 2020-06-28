@@ -25,7 +25,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Motion Blur
     - [x] BVH(Bounding Volume Hierarchies)
     - [x] Solid Textures
-    - [ ] Perlin Noise
+    - [x] Perlin Noise
     - [ ] Image Textures
     - [ ] Rectangles
     - [ ] Lights

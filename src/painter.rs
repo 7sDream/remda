@@ -14,13 +14,13 @@ use {
 };
 
 #[derive(Debug)]
-pub struct Image {
+pub struct PPMImage {
     width: usize,
     height: usize,
     colors: Vec<Color>,
 }
 
-impl Image {
+impl PPMImage {
     #[must_use]
     pub fn new(width: usize, height: usize) -> Self {
         let colors = vec![Color::default(); width * height];
@@ -73,13 +73,13 @@ impl Image {
     }
 }
 
-impl FromIterator<Color> for Image {
+impl FromIterator<Color> for PPMImage {
     fn from_iter<T: IntoIterator<Item = Color>>(iter: T) -> Self {
         Vec::from_iter(iter).into()
     }
 }
 
-impl<T> From<T> for Image
+impl<T> From<T> for PPMImage
 where
     T: Into<Vec<Color>>,
 {
@@ -93,27 +93,27 @@ where
     }
 }
 
-impl Index<(usize, usize)> for Image {
+impl Index<(usize, usize)> for PPMImage {
     type Output = Color;
     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
         self.index(row * self.width + col)
     }
 }
 
-impl Index<usize> for Image {
+impl Index<usize> for PPMImage {
     type Output = Color;
     fn index(&self, index: usize) -> &Self::Output {
         self.colors.index(index)
     }
 }
 
-impl IndexMut<(usize, usize)> for Image {
+impl IndexMut<(usize, usize)> for PPMImage {
     fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut Self::Output {
         self.index_mut(row * self.width + col)
     }
 }
 
-impl IndexMut<usize> for Image {
+impl IndexMut<usize> for PPMImage {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.colors.index_mut(index)
     }

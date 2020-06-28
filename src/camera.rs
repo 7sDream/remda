@@ -1,6 +1,6 @@
 use {
     crate::geometry::{Geometry, GeometryList, World},
-    crate::image::Painter,
+    crate::painter::Painter,
     crate::prelude::*,
     std::path::Path,
 };

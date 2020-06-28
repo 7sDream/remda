@@ -55,6 +55,7 @@ impl<M: Material> Geometry for Sphere<M> {
     }
 
     fn uv(&self, point: &Point3) -> (f64, f64) {
+        let point = (point - &self.center).unit();
         let phi = (-point.z).atan2(point.x); // [-pi, pi]
         let theta = point.y.asin(); // [-pi / 2 , pi / 2]
         let u = phi / 2.0 / PI + 0.5;

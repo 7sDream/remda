@@ -1,4 +1,4 @@
-use remda::{image::Painter, prelude::*};
+use remda::{painter::Painter, prelude::*};
 
 fn main() {
     env_logger::init();

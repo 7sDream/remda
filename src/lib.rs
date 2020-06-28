@@ -5,8 +5,8 @@
 
 pub mod camera;
 pub mod geometry;
-pub mod image;
 pub mod material;
+pub mod painter;
 pub mod prelude;
 pub mod texture;
 

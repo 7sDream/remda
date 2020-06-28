@@ -26,7 +26,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] BVH(Bounding Volume Hierarchies)
     - [x] Solid Textures
     - [x] Perlin Noise
-    - [ ] Image Textures
+    - [x] Image Textures
     - [ ] Rectangles
     - [ ] Lights
     - [ ] Box

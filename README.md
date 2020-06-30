@@ -1,4 +1,6 @@
 # Remda
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2F7sDream%2Fremda.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2F7sDream%2Fremda?ref=badge_shield)
+
 
 Learn [《Ray Tracing in One Weekend》series][book-series] using Rust.
 
@@ -69,3 +71,6 @@ Except:
 [screenshot]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
 [rayon-crates-io]: https://crates.io/crates/rayon
 [earth-map-source]: http://visibleearth.nasa.gov/view.php?id=57752
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2F7sDream%2Fremda.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2F7sDream%2Fremda?ref=badge_large)

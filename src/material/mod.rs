@@ -1,12 +1,14 @@
 use crate::{geometry::HitRecord, prelude::*};
 
-mod dielectric;
-mod lambertian;
-mod metal;
+pub(crate) mod dielectric;
+pub(crate) mod lambertian;
+pub(crate) mod light;
+pub(crate) mod metal;
 
 pub use {
     dielectric::{Dielectric, Glass},
     lambertian::{Lambertian, LambertianMathType},
+    light::DiffuseLight,
     metal::Metal,
 };
 
@@ -18,6 +20,10 @@ pub struct ScatterRecord {
 
 pub trait Material: Send + Sync {
     fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<ScatterRecord>;
+    #[allow(unused_variables)]
+    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Option<Vec3> {
+        None
+    }
 }
 
 pub(crate) fn reflect(ray: &Ray, hit: &HitRecord<'_>) -> Ray {

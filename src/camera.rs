@@ -134,19 +134,24 @@ impl<'c> TakePhotoSettings<'c> {
         self
     }
 
-    fn ray_color(ray: &Ray, world: &World, depth: usize) -> Color {
+    fn ray_color(ray: &Ray, world: &World, depth: usize) -> Vec3 {
         if depth == 0 {
-            return Color::default();
-        }
-        if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
-            let material = hit.material;
-            if let Some(scattered) = material.scatter(ray, hit) {
-                return scattered.color * Self::ray_color(&scattered.ray, world, depth - 1);
-            }
-            return Color::default();
+            return Vec3::default();
         }
 
-        world.background(ray)
+        if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
+            let material = hit.material;
+            let emitted = material
+                .emitted(hit.u, hit.v, &hit.point)
+                .unwrap_or_default();
+            if let Some(scattered) = material.scatter(ray, hit) {
+                return emitted
+                    + scattered.color * Self::ray_color(&scattered.ray, world, depth - 1);
+            }
+            return emitted;
+        }
+
+        world.background(ray).into()
     }
 
     /// # Errors
@@ -169,7 +174,7 @@ impl<'c> TakePhotoSettings<'c> {
         .parallel(self.parallel)
         .draw(&path, |u, v| -> Vec3 {
             let ray = self.camera.ray(u, v);
-            Self::ray_color(&ray, &self.world, self.depth).into()
+            Self::ray_color(&ray, &self.world, self.depth)
         })
     }
 }

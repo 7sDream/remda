@@ -1,9 +1,10 @@
 pub(crate) mod aabb;
 pub(crate) mod bvh;
 pub(crate) mod hit;
-pub mod list;
-pub mod sphere;
-pub mod world;
+pub(crate) mod list;
+pub(crate) mod rect;
+pub(crate) mod sphere;
+pub(crate) mod world;
 
 use {
     crate::{material::Material, prelude::*},
@@ -11,7 +12,13 @@ use {
 };
 
 pub(crate) use {aabb::AABB, bvh::BVH, hit::HitRecord};
-pub use {list::GeometryList, sphere::Sphere, world::World};
+
+pub use {
+    list::GeometryList,
+    rect::{AARect, AARectGeometry},
+    sphere::Sphere,
+    world::World,
+};
 
 pub trait Geometry: Send + Sync {
     fn normal(&self, p: &Point3) -> Vec3;

@@ -1,4 +1,3 @@
-use std::sync::atomic::Ordering;
 use {
     crate::{internal::rayon_seq_iter::SeqForEach, prelude::*},
     log::info,
@@ -9,7 +8,7 @@ use {
         iter::FromIterator,
         ops::{Index, IndexMut},
         path::Path,
-        sync::atomic::AtomicBool,
+        sync::atomic::{AtomicBool, Ordering},
     },
 };
 

@@ -1,5 +1,5 @@
 use {
-    super::{Color, Random, PI},
+    super::{clamp, Color, Random, PI},
     std::{
         fmt::Display,
         iter::Sum,
@@ -132,10 +132,15 @@ impl Vec3 {
     pub fn into_color(mut self, sample_count: usize, gamma: bool) -> Color {
         self /= sample_count as f64;
         if gamma {
-            Color::newf(self.x.sqrt(), self.y.sqrt(), self.z.sqrt())
-        } else {
-            Color::newf(self.x, self.y, self.z)
+            self.x = self.x.sqrt();
+            self.y = self.y.sqrt();
+            self.z = self.z.sqrt();
         }
+        Color::newf(
+            clamp(self.x, 0.0..=1.0),
+            clamp(self.y, 0.0..=1.0),
+            clamp(self.z, 0.0..=1.0),
+        )
     }
 }
 

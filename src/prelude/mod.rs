@@ -24,7 +24,7 @@ pub fn r2d(r: f64) -> f64 {
 }
 
 #[must_use]
-pub fn clamp<R: RangeBounds<f64>>(x: f64, range: R) -> f64 {
+pub fn clamp<R: RangeBounds<f64>>(val: f64, range: R) -> f64 {
     let start = match range.start_bound() {
         Bound::Included(&x) | Bound::Excluded(&x) => x,
         _ => std::f64::NEG_INFINITY,
@@ -33,11 +33,11 @@ pub fn clamp<R: RangeBounds<f64>>(x: f64, range: R) -> f64 {
         Bound::Included(&x) | Bound::Excluded(&x) => x,
         _ => std::f64::INFINITY,
     };
-    if start > x {
+    if start > val {
         start
-    } else if x > end {
+    } else if val > end {
         end
     } else {
-        x
+        val
     }
 }

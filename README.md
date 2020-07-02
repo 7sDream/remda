@@ -27,8 +27,9 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Solid Textures
     - [x] Perlin Noise
     - [x] Image Textures
-    - [ ] Rectangles
+    - [x] Rectangles
     - [x] Lights
+    - [x] Cornell Box
     - [ ] Box
     - [ ] Object Translation
     - [ ] Volumes

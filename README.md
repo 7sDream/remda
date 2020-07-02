@@ -30,6 +30,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Rectangles
     - [x] Lights
     - [x] Cornell Box
+    - [ ] Flip Face
     - [ ] Box
     - [ ] Object Translation
     - [ ] Volumes

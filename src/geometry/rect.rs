@@ -48,6 +48,22 @@ impl<M> AARect<M> {
             axis: (0, 1, 2),
         }
     }
+
+    pub const fn new_xz(geo: AARectGeometry, material: M) -> Self {
+        Self {
+            geo,
+            material,
+            axis: (0, 2, 1),
+        }
+    }
+
+    pub const fn new_yz(geo: AARectGeometry, material: M) -> Self {
+        Self {
+            geo,
+            material,
+            axis: (1, 2, 0),
+        }
+    }
 }
 
 impl<M: Material> Geometry for AARect<M> {

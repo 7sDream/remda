@@ -17,7 +17,7 @@ pub use {
     list::GeometryList,
     rect::{AARect, AARectGeometry},
     sphere::Sphere,
-    world::World,
+    world::{default_background, World},
 };
 
 pub trait Geometry: Send + Sync {

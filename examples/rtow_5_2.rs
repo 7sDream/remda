@@ -13,7 +13,7 @@ fn background(ray: &Ray) -> Color {
     if hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray) {
         return Color::newf(1.0, 0.0, 0.0);
     }
-    remda::geometry::world::default_background(ray)
+    remda::geometry::default_background(ray)
 }
 
 fn main() {

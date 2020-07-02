@@ -3,7 +3,7 @@ use {
     crate::{geometry::HitRecord, prelude::*, texture::Texture},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum LambertianMathType {
     Approximates,
     True,
@@ -33,7 +33,7 @@ impl LambertianMathType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Lambertian<T: Texture> {
     texture: T,
     math_type: LambertianMathType,

@@ -1,4 +1,7 @@
-use crate::{geometry::HitRecord, prelude::*};
+use {
+    crate::{geometry::HitRecord, prelude::*},
+    std::sync::Arc,
+};
 
 pub(crate) mod dielectric;
 pub(crate) mod lambertian;
@@ -23,6 +26,16 @@ pub trait Material: Send + Sync {
     #[allow(unused_variables)]
     fn emitted(&self, u: f64, v: f64, point: &Point3) -> Option<Vec3> {
         None
+    }
+}
+
+impl<M: Material> Material for Arc<M> {
+    fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<ScatterRecord> {
+        self.as_ref().scatter(ray, hit)
+    }
+
+    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Option<Vec3> {
+        self.as_ref().emitted(u, v, point)
     }
 }
 

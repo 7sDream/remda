@@ -32,7 +32,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Cornell Box
     - [ ] Flip Face
     - [ ] Box
-    - [ ] Object Translation
+    - [ ] Object Rotation
     - [ ] Volumes
 - [ ] [《Ray Tracing: The Rest of Your Life》][book-3] not started yet
 

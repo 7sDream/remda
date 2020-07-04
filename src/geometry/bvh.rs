@@ -1,6 +1,6 @@
 use {
-    super::{Geometry, AABB},
-    crate::{geometry::HitRecord, material::Material, prelude::*},
+    super::{Geometry, HitRecord, AABB},
+    crate::prelude::*,
     std::{
         cmp::Ordering,
         fmt::{Debug, Formatter},
@@ -102,18 +102,6 @@ impl BVH {
 
 /// Bounding Volume Hierarchies
 impl Geometry for BVH {
-    fn normal(&self, _p: &Point3) -> Vec3 {
-        unimplemented!("BVH's normal function should not be called directly")
-    }
-
-    fn material(&self) -> &dyn Material {
-        unimplemented!("BVH's material function should not be called directly")
-    }
-
-    fn uv(&self, _point: &Point3) -> (f64, f64) {
-        unimplemented!("BVH's uv function should not be called directly")
-    }
-
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         let bbox = self.bbox.as_ref()?;
         if !bbox.hit(ray, unit_limit.clone()) {

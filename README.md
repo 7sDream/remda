@@ -30,8 +30,8 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Rectangles
     - [x] Lights
     - [x] Cornell Box
-    - [ ] Flip Face
-    - [ ] Box
+    - [ ] Flip Face // seems we do not need this anymore
+    - [x] Box
     - [ ] Object Rotation
     - [ ] Volumes
 - [ ] [《Ray Tracing: The Rest of Your Life》][book-3] not started yet

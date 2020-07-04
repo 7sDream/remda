@@ -52,17 +52,8 @@ impl BitOr<Self> for &AABB {
     type Output = AABB;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        let min = Point3::new(
-            self.min.x.min(rhs.min.x),
-            self.min.y.min(rhs.min.y),
-            self.min.z.min(rhs.min.z),
-        );
-
-        let max = Point3::new(
-            self.max.x.max(rhs.max.x),
-            self.max.y.max(rhs.max.y),
-            self.max.z.max(rhs.max.z),
-        );
+        let min = Point3::new_min(&self.min, &rhs.min);
+        let max = Point3::new_max(&self.max, &rhs.max);
 
         AABB::new(min, max)
     }
@@ -94,17 +85,8 @@ impl BitOr<AABB> for &AABB {
 
 impl BitOrAssign<&Self> for AABB {
     fn bitor_assign(&mut self, rhs: &Self) {
-        self.min = Point3::new(
-            self.min.x.min(rhs.min.x),
-            self.min.y.min(rhs.min.y),
-            self.min.z.min(rhs.min.z),
-        );
-
-        self.max = Point3::new(
-            self.max.x.max(rhs.max.x),
-            self.max.y.max(rhs.max.y),
-            self.max.z.max(rhs.max.z),
-        );
+        self.min = Point3::new_min(&self.min, &rhs.min);
+        self.max = Point3::new_max(&self.max, &rhs.max);
     }
 }
 

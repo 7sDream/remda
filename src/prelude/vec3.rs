@@ -26,6 +26,24 @@ impl Vec3 {
     }
 
     #[must_use]
+    pub fn new_min(a: &Self, b: &Self) -> Self {
+        Self {
+            x: a.x.min(b.x),
+            y: a.y.min(b.y),
+            z: a.z.min(b.z),
+        }
+    }
+
+    #[must_use]
+    pub fn new_max(a: &Self, b: &Self) -> Self {
+        Self {
+            x: a.x.max(b.x),
+            y: a.y.max(b.y),
+            z: a.z.max(b.z),
+        }
+    }
+
+    #[must_use]
     pub fn random_in_unit_box() -> Self {
         Self::new(
             Random::range(-1.0..1.0),

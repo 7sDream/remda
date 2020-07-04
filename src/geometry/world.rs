@@ -1,6 +1,6 @@
 use {
     super::{Geometry, HitRecord, AABB, BVH},
-    crate::{material::Material, prelude::*},
+    crate::prelude::*,
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
@@ -49,18 +49,6 @@ impl World {
 }
 
 impl Geometry for World {
-    fn normal(&self, _p: &Point3) -> Vec3 {
-        unimplemented!("World's normal function should not be called directly")
-    }
-
-    fn material(&self) -> &dyn Material {
-        unimplemented!("World's material function should not be called directly")
-    }
-
-    fn uv(&self, _point: &Point3) -> (f64, f64) {
-        unimplemented!("World's uv function should not be called directly")
-    }
-
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.bvh.hit(ray, unit_limit)
     }

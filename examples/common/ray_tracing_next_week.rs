@@ -2,7 +2,7 @@ use {
     super::common,
     remda::{
         camera::{Camera, CameraBuilder},
-        geometry::{AARect, AARectGeometry, GeometryList},
+        geometry::{AARect, AARectGeometry, Carton, GeometryList},
         material::{DiffuseLight, Lambertian},
         prelude::*,
     },
@@ -24,7 +24,7 @@ pub fn motion_blur(seed: Option<u64>, checker: bool) -> (Camera, GeometryList) {
 }
 
 #[must_use]
-pub fn cornell_box(_flip: bool) -> (Camera, GeometryList) {
+pub fn cornell_box(carton: bool) -> (Camera, GeometryList) {
     let red = Lambertian::new(Color::newf(0.65, 0.05, 0.05));
     let green = Lambertian::new(Color::newf(0.12, 0.45, 0.15));
     let white = Lambertian::new(Color::newf(0.73, 0.73, 0.73));
@@ -55,8 +55,22 @@ pub fn cornell_box(_flip: bool) -> (Camera, GeometryList) {
         ))
         .add(AARect::new_xy(
             AARectGeometry::new(555.0, (0.0, 555.0), (0.0, 555.0)),
-            white,
+            white.clone(),
         ));
+
+    if carton {
+        objects
+            .add(Carton::new(
+                &Point3::new(130.0, 0.0, 65.0),
+                &Point3::new(295.0, 165.0, 230.0),
+                white.clone(),
+            ))
+            .add(Carton::new(
+                &Point3::new(265.0, 0.0, 295.0),
+                &Point3::new(430.0, 330.0, 460.0),
+                white,
+            ));
+    }
 
     let camera = CameraBuilder::default()
         .aspect_ratio(1.0)

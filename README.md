@@ -30,7 +30,7 @@ Yet another simple and pure software ray tracing renderer.
     - [x] Rectangles
     - [x] Lights
     - [x] Cornell Box
-    - [ ] Flip Face // seems we do not need this anymore
+    - [ ] Flip Face // seems we do not need this anymore (RayTracing/raytracing.github.io#602)
     - [x] Box
     - [ ] Object Rotation
     - [ ] Volumes

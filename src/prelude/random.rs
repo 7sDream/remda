@@ -8,18 +8,18 @@ use {
 
 #[must_use]
 fn normal<R: Rng>(mut rng: R) -> f64 {
-    rng.gen_range(0.0, 1.0)
+    rng.gen_range(0.0..=1.0)
 }
 
 #[must_use]
-fn range<R: Rng, T: SampleUniform>(mut rng: R, r: Range<T>) -> T {
-    rng.gen_range(r.start, r.end)
+fn range<R: Rng, T: SampleUniform + PartialOrd>(mut rng: R, r: Range<T>) -> T {
+    rng.gen_range(r)
 }
 
 fn choose<T, R: Rng, S: AsRef<[T]>>(mut rng: R, values: &S) -> &T {
     let slice = values.as_ref();
     assert!(!slice.is_empty());
-    let index = rng.gen_range(0, slice.len());
+    let index = rng.gen_range(0..slice.len());
     &slice[index]
 }
 
@@ -38,7 +38,7 @@ impl Random {
     }
 
     #[must_use]
-    pub fn range<T: SampleUniform>(r: Range<T>) -> T {
+    pub fn range<T: SampleUniform + PartialOrd>(r: Range<T>) -> T {
         range(thread_rng(), r)
     }
 
@@ -69,7 +69,7 @@ impl SeedRandom {
         normal(&mut self.0)
     }
 
-    pub fn range<T: SampleUniform>(&mut self, r: Range<T>) -> T {
+    pub fn range<T: SampleUniform + PartialOrd>(&mut self, r: Range<T>) -> T {
         range(&mut self.0, r)
     }
 

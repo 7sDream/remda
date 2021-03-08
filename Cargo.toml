@@ -14,16 +14,16 @@ name = "remda"
 path = "src/lib.rs"
 
 [dependencies]
-env_logger = "0.7"
+env_logger = "0.8"
 log = "0.4"
-rand = "0.7"
-rayon = "1.3"
+rand = "0.8"
+rayon = "1.5"
 num_cpus = "1.13"
 
 [dependencies.image]
 version = "0.23"
 default-features = false
-features = ["jpeg", "jpeg_rayon", "png", "bmp"]
+features = ["jpeg_rayon", "png", "bmp"]
 
 [profile.release]
 debug = true

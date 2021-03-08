@@ -9,7 +9,7 @@ use remda::{
 fn main() {
     let mut world = GeometryList::default();
     // Image comes from http://visibleearth.nasa.gov/view.php?id=57752
-    let earth_texture = Image::new("examples/earthmap.png").unwrap();
+    let earth_texture = Image::new("examples/earth-map.png").unwrap();
 
     world
         .add(Sphere::new(

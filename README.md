@@ -1,40 +1,38 @@
 # Remda
 
-Learn [《Ray Tracing in One Weekend》series][book-series] using Rust.
+Learn [*Ray Tracing in One Weekend* series][book-series] using Rust.
 
-Yet another simple and pure software ray tracing renderer.
+Yet another naive and pure software ray tracing renderer.
 
 ## Screenshot
 
-![][screenshot]
+![screenshot of the example scene][screenshot]
 
 ## Current Progress
 
-- [ ] [《Ray Tracing in One Weekend》][book-1]
-    - [x] Basic types, Vec, Color, Ray, etc
-    - [x] Background/Sky
-    - [x] Sphere
-    - [x] Lambertian Material
-    - [x] Metal Material with Different Fuzz
-    - [x] Glass Material with Different Refractive
-    - [x] Pinhole Camera
-    - [x] Camera Defocus/Depth Field
-    - [ ] Triangles Geometry
-    - [x] Parallelism (by using [rayon][rayon-crates-io])
-- [ ] [《Ray Tracing: The Next Week》][book-2]
-    - [x] Motion Blur
-    - [x] BVH(Bounding Volume Hierarchies)
-    - [x] Solid Textures
-    - [x] Perlin Noise
-    - [x] Image Textures
-    - [x] Rectangles
-    - [x] Lights
-    - [x] Cornell Box
-    - [ ] Flip Face // seems we do not need this anymore (RayTracing/raytracing.github.io#602)
-    - [x] Box
-    - [ ] Object Rotation
-    - [ ] Volumes
-- [ ] [《Ray Tracing: The Rest of Your Life》][book-3] not started yet
+- [ ] [*Ray Tracing in One Weekend*][book-1]
+  - [x] Basic types, Vec, Color, Ray, etc
+  - [x] Background/Sky
+  - [x] Sphere
+  - [x] Lambertian Material
+  - [x] Metal Material with Different Fuzz
+  - [x] Glass Material with Different Refractive
+  - [x] Pinhole Camera
+  - [x] Camera Defocus/Depth Field
+  - [x] Parallelism (by using [rayon][rayon-crates-io])
+- [ ] [*Ray Tracing: The Next Week*][book-2]
+  - [x] Motion Blur
+  - [x] BVH(Bounding Volume Hierarchies)
+  - [x] Solid Textures
+  - [x] Perlin Noise
+  - [x] Image Textures
+  - [x] Rectangles
+  - [x] Lights
+  - [x] Cornell Box
+  - [x] Box
+  - [ ] Instance Rotation
+  - [ ] Volumes
+- [ ] [*Ray Tracing: The Rest of Your Life*][book-3] not started yet
 
 ## Run
 
@@ -45,7 +43,7 @@ Use `cargo run --example` to get examples list, then choose one to run.
 For example, to get final scene in section 13.1 of《Ray Tracing in One Weekend》, run
 
 ```bash
-$ cargo run --example rtow_13_1 --release
+cargo run --example rtow_13_1 --release
 ```
 
 Wait about 1s(according to your machine's CPU performance), you will get a `rtow_13_1.ppm` in current dir, that's your result.
@@ -60,9 +58,9 @@ You can also try other examples if you want.
 
 GPLv3
 
-Except: 
+Except:
 
-- `example/earthmap.png`, download from [NASA][earth-map-source], fall in public domain
+- `example/earth-map.png`, download from [NASA][earth-map-source], fall in public domain.
 
 [book-series]: https://raytracing.github.io/
 [book-1]: https://raytracing.github.io/books/RayTracingInOneWeekend.html

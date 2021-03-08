@@ -10,7 +10,7 @@ Yet another naive and pure software ray tracing renderer.
 
 ## Current Progress
 
-- [ ] [*Ray Tracing in One Weekend*][book-1]
+- [x] [*Ray Tracing in One Weekend*][book-1]
   - [x] Basic types, Vec, Color, Ray, etc
   - [x] Background/Sky
   - [x] Sphere
@@ -19,7 +19,8 @@ Yet another naive and pure software ray tracing renderer.
   - [x] Glass Material with Different Refractive
   - [x] Pinhole Camera
   - [x] Camera Defocus/Depth Field
-  - [x] Parallelism (by using [rayon][rayon-crates-io])
+  - Extra
+    - [x] Parallelism (by using [rayon][rayon-crates-io])
 - [ ] [*Ray Tracing: The Next Week*][book-2]
   - [x] Motion Blur
   - [x] BVH(Bounding Volume Hierarchies)
@@ -40,7 +41,7 @@ Remda is a library crate, but you can run built-in examples(from the book series
 
 Use `cargo run --example` to get examples list, then choose one to run.
 
-For example, to get final scene in section 13.1 of《Ray Tracing in One Weekend》, run
+For example, to get final scene in section 13.1 of *Ray Tracing in One Weekend*, run
 
 ```bash
 cargo run --example rtow_13_1 --release
@@ -50,7 +51,7 @@ Wait about 1s(according to your machine's CPU performance), you will get a `rtow
 
 If you want a bigger and clear image, adjust `height()` and `samples()` argument in example source file and re-run.
 
-PS: The screenshot above takes about 8min30s to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient;
+PS: The screenshot above takes about 8min30s to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient.
 
 You can also try other examples if you want.
 

@@ -30,7 +30,9 @@ Yet another naive and pure software ray tracing renderer.
   - [x] Lights
   - [x] Cornell Box
   - [x] Box
-  - [ ] Instance Rotation
+  - [ ] Instance
+    - [x] Translation(Movement)
+    - [ ] Rotation by Axes
   - [ ] Volumes
 - [ ] [*Ray Tracing: The Rest of Your Life*][book-3] not started yet
 

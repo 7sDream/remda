@@ -61,13 +61,13 @@ pub fn cornell_box(carton: bool) -> (Camera, GeometryList) {
     if carton {
         objects
             .add(Carton::new(
-                &Point3::new(130.0, 0.0, 65.0),
-                &Point3::new(295.0, 165.0, 230.0),
+                Point3::new(130.0, 0.0, 65.0),
+                Point3::new(295.0, 165.0, 230.0),
                 white.clone(),
             ))
             .add(Carton::new(
-                &Point3::new(265.0, 0.0, 295.0),
-                &Point3::new(430.0, 330.0, 460.0),
+                Point3::new(265.0, 0.0, 295.0),
+                Point3::new(430.0, 330.0, 460.0),
                 white,
             ));
     }

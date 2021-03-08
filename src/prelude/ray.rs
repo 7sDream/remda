@@ -9,11 +9,11 @@ pub struct Ray {
 
 impl Ray {
     #[must_use]
-    pub const fn new(origin: Point3, direction: Vec3, time: f64) -> Self {
+    pub const fn new(origin: Point3, direction: Vec3, departure_time: f64) -> Self {
         Self {
             origin,
             direction,
-            departure_time: time,
+            departure_time,
         }
     }
 

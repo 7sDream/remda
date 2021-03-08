@@ -5,6 +5,7 @@ pub(crate) mod hit;
 pub(crate) mod list;
 pub(crate) mod rect;
 pub(crate) mod sphere;
+pub(crate) mod transform;
 pub(crate) mod world;
 
 use {
@@ -19,11 +20,19 @@ pub use {
     list::GeometryList,
     rect::{AARect, AARectGeometry},
     sphere::Sphere,
+    transform::translation::Translation,
     world::{default_background, World},
 };
 
 #[allow(unused_variables)]
 pub trait Geometry: Send + Sync {
+    fn translate(self, movement: Vec3) -> Translation<Self>
+    where
+        Self: Sized,
+    {
+        Translation::new(self, movement)
+    }
+
     fn normal(&self, p: &Point3) -> Vec3 {
         unimplemented!(
             "{}'s normal function should not be called directly",

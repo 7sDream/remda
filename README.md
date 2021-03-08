@@ -19,8 +19,7 @@ Yet another naive and pure software ray tracing renderer.
   - [x] Glass Material with Different Refractive
   - [x] Pinhole Camera
   - [x] Camera Defocus/Depth Field
-  - Extra
-    - [x] Parallelism (by using [rayon][rayon-crates-io])
+  - [x] (Extra) Parallelism (by using [rayon][rayon-crates-io])
 - [ ] [*Ray Tracing: The Next Week*][book-2]
   - [x] Motion Blur
   - [x] BVH(Bounding Volume Hierarchies)

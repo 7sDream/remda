@@ -20,7 +20,7 @@ pub use {
     list::GeometryList,
     rect::{AARect, AARectGeometry},
     sphere::Sphere,
-    transform::translation::Translation,
+    transform::{rotation::AARotation, translation::Translation},
     world::{default_background, World},
 };
 

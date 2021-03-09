@@ -1,6 +1,6 @@
-use {
-    crate::geometry::{Geometry, AABB},
-    crate::prelude::*,
+use crate::{
+    geometry::{Geometry, HitRecord, AABB},
+    prelude::*,
 };
 
 #[derive(Debug, Clone)]
@@ -16,9 +16,7 @@ impl<G> Translation<G> {
 }
 
 impl<G: Geometry> Geometry for Translation<G> {
-    fn hit(
-        &self, ray: &Ray, unit_limit: std::ops::Range<f64>,
-    ) -> Option<crate::geometry::HitRecord<'_>> {
+    fn hit(&self, ray: &Ray, unit_limit: std::ops::Range<f64>) -> Option<HitRecord<'_>> {
         let moved_ray = Ray::new(
             &ray.origin - &self.movement,
             ray.direction.clone(),
@@ -30,7 +28,7 @@ impl<G: Geometry> Geometry for Translation<G> {
         })
     }
 
-    fn bbox(&self, time_limit: std::ops::Range<f64>) -> Option<crate::geometry::AABB> {
+    fn bbox(&self, time_limit: std::ops::Range<f64>) -> Option<AABB> {
         self.geometry
             .bbox(time_limit)
             .map(|bbox| AABB::new(bbox.min() + &self.movement, bbox.max() + &self.movement))

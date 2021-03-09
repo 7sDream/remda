@@ -1,8 +1,10 @@
+use remda::geometry::Geometry;
+
 use {
     super::common,
     remda::{
         camera::{Camera, CameraBuilder},
-        geometry::{AARect, AARectGeometry, Carton, GeometryList},
+        geometry::{AARect, AARectGeometry, AARotation, Carton, GeometryList},
         material::{DiffuseLight, Lambertian},
         prelude::*,
     },
@@ -24,7 +26,7 @@ pub fn motion_blur(seed: Option<u64>, checker: bool) -> (Camera, GeometryList) {
 }
 
 #[must_use]
-pub fn cornell_box(carton: bool) -> (Camera, GeometryList) {
+pub fn cornell_box(carton: bool, carton_rotation: bool) -> (Camera, GeometryList) {
     let red = Lambertian::new(Color::newf(0.65, 0.05, 0.05));
     let green = Lambertian::new(Color::newf(0.12, 0.45, 0.15));
     let white = Lambertian::new(Color::newf(0.73, 0.73, 0.73));
@@ -59,17 +61,43 @@ pub fn cornell_box(carton: bool) -> (Camera, GeometryList) {
         ));
 
     if carton {
-        objects
-            .add(Carton::new(
-                Point3::new(130.0, 0.0, 65.0),
-                Point3::new(295.0, 165.0, 230.0),
-                white.clone(),
-            ))
-            .add(Carton::new(
-                Point3::new(265.0, 0.0, 295.0),
-                Point3::new(430.0, 330.0, 460.0),
-                white,
-            ));
+        if carton_rotation {
+            objects
+                .add(
+                    AARotation::new_by_y(
+                        Carton::new(
+                            Point3::new(0.0, 0.0, 0.0),
+                            Point3::new(165.0, 165.0, 165.0),
+                            white.clone(),
+                        ),
+                        -18.0,
+                    )
+                    .translate(Vec3::new(130.0, 0.0, 65.0)),
+                )
+                .add(
+                    AARotation::new_by_y(
+                        Carton::new(
+                            Point3::new(0.0, 0.0, 0.0),
+                            Point3::new(165.0, 330.0, 165.0),
+                            white,
+                        ),
+                        15.0,
+                    )
+                    .translate(Vec3::new(265.0, 0.0, 295.0)),
+                );
+        } else {
+            objects
+                .add(Carton::new(
+                    Point3::new(130.0, 0.0, 65.0),
+                    Point3::new(295.0, 165.0, 230.0),
+                    white.clone(),
+                ))
+                .add(Carton::new(
+                    Point3::new(265.0, 0.0, 295.0),
+                    Point3::new(430.0, 330.0, 460.0),
+                    white,
+                ));
+        }
     }
 
     let camera = CameraBuilder::default()

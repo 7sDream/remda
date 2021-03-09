@@ -6,7 +6,11 @@ Yet another naive and pure software ray tracing renderer.
 
 ## Screenshot
 
-![screenshot of the example scene][screenshot]
+![rendered image of RTOW's final scene][rtow-final-scene-render-result]
+*example rtow_13_1, 512 sample, 8 depth, 1920x1080, 8m30s*
+
+![rendered image of RTNW's Cornell scene][rtnw-cornell-rotated-scene-render-result]
+*example rtnw_8_2, 10240 sample, 10 depth, 1000x1000, 1h20m*
 
 ## Current Progress
 
@@ -30,9 +34,7 @@ Yet another naive and pure software ray tracing renderer.
   - [x] Lights
   - [x] Cornell Box
   - [x] Box
-  - [ ] Instance
-    - [x] Translation(Movement)
-    - [ ] Rotation by Axes
+  - [x] Instance Translation and Rotation
   - [ ] Volumes
 - [ ] [*Ray Tracing: The Rest of Your Life*][book-3] not started yet
 
@@ -50,11 +52,11 @@ cargo run --example rtow_13_1 --release
 
 Wait about 1s(according to your machine's CPU performance), you will get a `rtow_13_1.ppm` in current dir, that's your result.
 
-If you want a bigger and clear image, adjust `height()` and `samples()` argument in example source file and re-run.
-
-PS: The screenshot above takes about 8min30s to render(1920x1080, 512 samples, Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz), be patient.
+If you want a bigger and clear image, adjust `height()`, `depth` and `samples()` parameter in example source file and re-run.
 
 You can also try other examples if you want.
+
+PS: Pure software ray tracing takes a long time to render, be patient.
 
 ## LICENSE
 
@@ -68,6 +70,7 @@ Except:
 [book-1]: https://raytracing.github.io/books/RayTracingInOneWeekend.html
 [book-2]: https://raytracing.github.io/books/RayTracingTheNextWeek.html
 [book-3]: https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
-[screenshot]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
+[rtow-final-scene-render-result]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
+[rtnw-cornell-rotated-scene-render-result]: https://rikka.7sdre.am/files/1721b196-b746-4e6d-a4d0-f9c7c2e75c41.png
 [rayon-crates-io]: https://crates.io/crates/rayon
 [earth-map-source]: http://visibleearth.nasa.gov/view.php?id=57752

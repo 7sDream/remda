@@ -4,7 +4,9 @@ mod common;
 use remda::prelude::*;
 
 fn main() {
-    let (camera, world) = common::ray_tracing_next_week::cornell_box(false, false);
+    common::init_log("info");
+
+    let (camera, world) = common::ray_tracing_next_week::cornell_box(true, true);
 
     camera
         .take_photo(world)
@@ -12,6 +14,6 @@ fn main() {
         .height(300)
         .depth(50)
         .samples(1000)
-        .shot(Some("rtnw_7_6.ppm"))
+        .shot(Some("rtnw_8_2.ppm"))
         .unwrap();
 }

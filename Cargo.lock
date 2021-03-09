@@ -407,6 +407,7 @@ dependencies = [
  "image",
  "log",
  "num_cpus",
+ "once_cell",
  "rand",
  "rayon",
 ]

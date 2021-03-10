@@ -4,7 +4,7 @@ Learn [*Ray Tracing in One Weekend* series][book-series] using Rust.
 
 Yet another naive and pure software ray tracing renderer.
 
-## Screenshot
+## Render Result Examples
 
 ![rendered image of RTOW's final scene][rtow-final-scene-render-result]
 *example rtow_13_1, 512 sample, 8 depth, 1920x1080, 8m30s*

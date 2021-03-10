@@ -7,14 +7,27 @@ use {
     std::marker::PhantomData,
 };
 
-pub trait RotationByAxes: Send + Sync {
+pub trait RotationByAxis: Send + Sync {
     fn rotate(point: &Point3, radian: f64) -> Point3;
 }
 
 #[derive(Debug)]
-pub struct ByYAxes;
+pub struct ByXAxis;
 
-impl RotationByAxes for ByYAxes {
+impl RotationByAxis for ByXAxis {
+    fn rotate(point: &Point3, radian: f64) -> Point3 {
+        Point3::new(
+            point.x,
+            radian.cos() * point.y - radian.sin() * point.z,
+            radian.sin().mul_add(point.y, radian.cos() * point.z),
+        )
+    }
+}
+
+#[derive(Debug)]
+pub struct ByYAxis;
+
+impl RotationByAxis for ByYAxis {
     fn rotate(point: &Point3, radian: f64) -> Point3 {
         Point3::new(
             radian.cos().mul_add(point.x, radian.sin() * point.z),
@@ -25,15 +38,28 @@ impl RotationByAxes for ByYAxes {
 }
 
 #[derive(Debug)]
-pub struct AARotation<Axes, G> {
+pub struct ByZAxis;
+
+impl RotationByAxis for ByZAxis {
+    fn rotate(point: &Point3, radian: f64) -> Point3 {
+        Point3::new(
+            radian.cos() * point.x - radian.sin() * point.y,
+            radian.sin().mul_add(point.x, radian.cos() * point.y),
+            point.z,
+        )
+    }
+}
+
+#[derive(Debug)]
+pub struct AARotation<Axis, G> {
     geometry: G,
     radian: f64,
     bbox_cache: OnceCell<Option<AABB>>,
-    axes: PhantomData<Axes>,
+    axes: PhantomData<Axis>,
 }
 
-impl<G> AARotation<ByYAxes, G> {
-    pub fn new_by_y(geometry: G, angle: f64) -> Self {
+impl<Axis, G> AARotation<Axis, G> {
+    pub fn new(geometry: G, angle: f64) -> Self {
         Self {
             geometry,
             radian: angle.to_radians(),
@@ -43,16 +69,16 @@ impl<G> AARotation<ByYAxes, G> {
     }
 }
 
-impl<Axes: RotationByAxes, G: Geometry> Geometry for AARotation<Axes, G> {
+impl<Axis: RotationByAxis, G: Geometry> Geometry for AARotation<Axis, G> {
     fn hit(&self, ray: &Ray, unit_limit: std::ops::Range<f64>) -> Option<HitRecord<'_>> {
-        let rotated_origin = Axes::rotate(&ray.origin, -self.radian);
-        let rotated_direction = Axes::rotate(&ray.direction, -self.radian);
+        let rotated_origin = Axis::rotate(&ray.origin, -self.radian);
+        let rotated_direction = Axis::rotate(&ray.direction, -self.radian);
         let rotated_ray = Ray::new(rotated_origin, rotated_direction, ray.departure_time);
         self.geometry
             .hit(&rotated_ray, unit_limit)
             .map(|mut record| {
-                record.point = Axes::rotate(&record.point, self.radian);
-                record.normal = Axes::rotate(&record.normal, self.radian);
+                record.point = Axis::rotate(&record.point, self.radian);
+                record.normal = Axis::rotate(&record.normal, self.radian);
                 record
             })
     }
@@ -77,7 +103,7 @@ impl<Axes: RotationByAxes, G: Geometry> Geometry for AARotation<Axes, G> {
                                     (k as f64).mul_add(bbox.max().z, (1 - k) as f64 * bbox.min().z);
 
                                 let rotated_point =
-                                    Axes::rotate(&Point3::new(x, y, z), self.radian);
+                                    Axis::rotate(&Point3::new(x, y, z), self.radian);
 
                                 for c in 0..3 {
                                     point_min[c] = point_min[c].min(rotated_point[c]);

@@ -5,7 +5,9 @@ use {
     remda::{
         camera::{Camera, CameraBuilder},
         geometry::{
-            collection::GeometryList, transform::AARotation, AARect, AARectMetrics, Carton,
+            collection::GeometryList,
+            transform::{AARotation, ByYAxis},
+            AARect, AARectMetrics, Carton,
         },
         material::{DiffuseLight, Lambertian},
         prelude::*,
@@ -66,7 +68,7 @@ pub fn cornell_box(carton: bool, carton_rotation: bool) -> (Camera, GeometryList
         if carton_rotation {
             objects
                 .add(
-                    AARotation::new_by_y(
+                    AARotation::<ByYAxis, _>::new(
                         Carton::new(
                             Point3::new(0.0, 0.0, 0.0),
                             Point3::new(165.0, 165.0, 165.0),
@@ -77,7 +79,7 @@ pub fn cornell_box(carton: bool, carton_rotation: bool) -> (Camera, GeometryList
                     .translate(Vec3::new(130.0, 0.0, 65.0)),
                 )
                 .add(
-                    AARotation::new_by_y(
+                    AARotation::<ByYAxis, _>::new(
                         Carton::new(
                             Point3::new(0.0, 0.0, 0.0),
                             Point3::new(165.0, 330.0, 165.0),

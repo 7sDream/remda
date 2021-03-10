@@ -266,7 +266,7 @@ impl CameraBuilder {
 
     #[must_use]
     pub fn shutter_speed(mut self, duration: f64) -> Self {
-        debug_assert!(duration >= 0.0, "distance = {}", duration);
+        debug_assert!(duration >= 0.0, "duration = {}", duration);
         self.shutter_speed = duration;
         self
     }

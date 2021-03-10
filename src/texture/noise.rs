@@ -1,10 +1,10 @@
-use {super::Texture, crate::prelude::*};
+use crate::{prelude::*, texture::Texture};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum SmoothType {
     None,
-    Interp,
-    Hermitian,
+    LinearInterpolate,
+    HermitianCubic,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -15,7 +15,7 @@ enum TextureType {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum RanType {
+enum RandomValueType {
     Float(f64),
     Vector(Vec3),
 }
@@ -26,13 +26,13 @@ pub struct Perlin {
     smooth_type: SmoothType,
     point_count: usize,
     scale: f64,
-    ran: Vec<RanType>,
+    random_values: Vec<RandomValueType>,
     perm_x: Vec<usize>,
     perm_y: Vec<usize>,
     perm_z: Vec<usize>,
 }
 
-impl Default for RanType {
+impl Default for RandomValueType {
     fn default() -> Self {
         Self::Float(0.0)
     }
@@ -44,9 +44,9 @@ impl Perlin {
         let ran = (0..point_count)
             .map(|_| {
                 if vector {
-                    RanType::Vector(Vec3::random_unit())
+                    RandomValueType::Vector(Vec3::random_unit())
                 } else {
-                    RanType::Float(Random::normal())
+                    RandomValueType::Float(Random::normal())
                 }
             })
             .collect();
@@ -58,10 +58,10 @@ impl Perlin {
         Random::shuffle(&mut perm_z);
         Self {
             texture_type: TextureType::Normal,
-            smooth_type: SmoothType::Hermitian,
+            smooth_type: SmoothType::HermitianCubic,
             point_count,
             scale: 1.0,
-            ran,
+            random_values: ran,
             perm_x,
             perm_y,
             perm_z,
@@ -103,12 +103,12 @@ impl Perlin {
                 let j = (((4.0 * point.y) as isize) & (self.point_count - 1) as isize) as usize;
                 let k = (((4.0 * point.z) as isize) & (self.point_count - 1) as isize) as usize;
 
-                match &self.ran[self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]] {
-                    RanType::Vector(v) => v.x,
-                    RanType::Float(x) => *x,
+                match &self.random_values[self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]] {
+                    RandomValueType::Vector(v) => v.x,
+                    RandomValueType::Float(x) => *x,
                 }
             }
-            SmoothType::Interp | SmoothType::Hermitian => {
+            SmoothType::LinearInterpolate | SmoothType::HermitianCubic => {
                 let i = point.x.floor() as isize;
                 let j = point.y.floor() as isize;
                 let k = point.z.floor() as isize;
@@ -116,7 +116,7 @@ impl Perlin {
                 let v = point.y - j as f64;
                 let w = point.z - k as f64;
 
-                let mut grays: [[[RanType; 2]; 2]; 2] = Default::default();
+                let mut grays: [[[RandomValueType; 2]; 2]; 2] = Default::default();
 
                 (0..2).for_each(|di| {
                     (0..2).for_each(|dj| {
@@ -125,17 +125,17 @@ impl Perlin {
                             let yi = ((j + dj as isize) & (self.point_count - 1) as isize) as usize;
                             let zi = ((k + dk as isize) & (self.point_count - 1) as isize) as usize;
                             let index = self.perm_x[xi] ^ self.perm_y[yi] ^ self.perm_z[zi];
-                            grays[di][dj][dk] = self.ran[index].clone();
+                            grays[di][dj][dk] = self.random_values[index].clone();
                         })
                     })
                 });
 
-                interp(&grays, u, v, w, &self.smooth_type)
+                interpolate(&grays, u, v, w, &self.smooth_type)
             }
         }
     }
 
-    fn turb(&self, point: &Point3, depth: usize) -> f64 {
+    fn calculate_turbulence(&self, point: &Point3, depth: usize) -> f64 {
         let mut p = point.clone();
         let mut weight = 1.0;
 
@@ -152,9 +152,11 @@ impl Perlin {
 }
 
 #[allow(clippy::cast_precision_loss)] // i j k is small enough
-fn interp(c: &[[[RanType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothType) -> f64 {
+fn interpolate(
+    c: &[[[RandomValueType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothType,
+) -> f64 {
     let (mut uu, mut vv, mut ww) = (u, v, w);
-    if smooth == &SmoothType::Hermitian {
+    if smooth == &SmoothType::HermitianCubic {
         uu = u * u * (3.0 - 2.0 * u);
         vv = v * v * (3.0 - 2.0 * v);
         ww = w * w * (3.0 - 2.0 * w);
@@ -170,12 +172,12 @@ fn interp(c: &[[[RanType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothTyp
                                 * (j as f64).mul_add(vv, (1 - j) as f64 * (1.0 - vv))
                                 * (k as f64).mul_add(ww, (1 - k) as f64 * (1.0 - ww))
                                 * match &c[i][j][k] {
-                                    RanType::Vector(vec) => {
+                                    RandomValueType::Vector(vec) => {
                                         let weight =
                                             Vec3::new(u - i as f64, v - j as f64, w - k as f64);
                                         vec.dot(&weight)
                                     }
-                                    RanType::Float(x) => *x,
+                                    RandomValueType::Float(x) => *x,
                                 }
                         })
                         .sum::<f64>()
@@ -187,20 +189,20 @@ fn interp(c: &[[[RanType; 2]; 2]; 2], u: f64, v: f64, w: f64, smooth: &SmoothTyp
 
 impl Texture for Perlin {
     fn color(&self, _u: f64, _v: f64, point: &Point3) -> Color {
-        Color::newf(1.0, 1.0, 1.0)
+        Color::new(1.0, 1.0, 1.0)
             * match &self.texture_type {
                 TextureType::Normal => {
                     let p = self.scale * point;
                     let mut noise = self.noise(&p);
 
-                    if let RanType::Vector(_) = &self.ran[0] {
+                    if let RandomValueType::Vector(_) = &self.random_values[0] {
                         noise = 0.5 * (noise + 1.0);
                     }
                     noise
                 }
-                TextureType::Turbulence(depth) => self.turb(point, *depth as usize),
+                TextureType::Turbulence(depth) => self.calculate_turbulence(point, *depth as usize),
                 TextureType::Marble(depth) => {
-                    let noise = self.turb(point, *depth as usize);
+                    let noise = self.calculate_turbulence(point, *depth as usize);
                     (self.scale.mul_add(point.z, 10.0 * noise).sin() + 1.0) * 0.5
                 }
             }

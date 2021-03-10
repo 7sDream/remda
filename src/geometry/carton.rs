@@ -1,13 +1,16 @@
 use {
-    super::{AARect, AARectGeometry, Geometry, GeometryList, HitRecord, AABB},
-    crate::{material::Material, prelude::*},
+    crate::{
+        geometry::{collection::GeometryList, AARect, AARectMetrics, Geometry, HitRecord},
+        material::Material,
+        prelude::*,
+    },
     std::{ops::Range, sync::Arc},
 };
 
 #[derive(Debug)]
 pub struct Carton<M> {
-    min: Point3,
-    max: Point3,
+    point_min: Point3,
+    point_max: Point3,
     material: Arc<M>,
     faces: GeometryList,
 }
@@ -15,58 +18,84 @@ pub struct Carton<M> {
 impl<M: Material + 'static> Clone for Carton<M> {
     fn clone(&self) -> Self {
         Self::new_inner(
-            self.min.clone(),
-            self.max.clone(),
+            self.point_min.clone(),
+            self.point_max.clone(),
             Arc::clone(&self.material),
         )
     }
 }
 
 impl<M: Material + 'static> Carton<M> {
+    #[allow(clippy::needless_pass_by_value)] // for api consistency
     pub fn new(p0: Point3, p1: Point3, material: M) -> Self {
-        let pmin = Point3::new_min(&p0, &p1);
-        let pmax = Point3::new_max(&p0, &p1);
+        let point_min = Point3::new_min(&p0, &p1);
+        let point_max = Point3::new_max(&p0, &p1);
         let shared_material = Arc::new(material);
-        Self::new_inner(pmin, pmax, shared_material)
+        Self::new_inner(point_min, point_max, shared_material)
     }
 
-    fn new_inner(pmin: Point3, pmax: Point3, material: Arc<M>) -> Self {
+    #[allow(clippy::too_many_lines)]
+    fn new_inner(point_min: Point3, point_max: Point3, material: Arc<M>) -> Self {
         let mut faces = GeometryList::default();
         faces
             .add(AARect::new_xy(
                 // back
-                AARectGeometry::new(pmin.z, (pmin.x, pmax.x), (pmin.y, pmax.y)),
+                AARectMetrics::new(
+                    point_min.z,
+                    (point_min.x, point_max.x),
+                    (point_min.y, point_max.y),
+                ),
                 Arc::clone(&material),
             ))
             .add(AARect::new_xy(
                 // front
-                AARectGeometry::new(pmax.z, (pmin.x, pmax.x), (pmin.y, pmax.y)),
+                AARectMetrics::new(
+                    point_max.z,
+                    (point_min.x, point_max.x),
+                    (point_min.y, point_max.y),
+                ),
                 Arc::clone(&material),
             ))
             .add(AARect::new_yz(
                 // left
-                AARectGeometry::new(pmin.x, (pmin.y, pmax.y), (pmin.z, pmax.z)),
+                AARectMetrics::new(
+                    point_min.x,
+                    (point_min.y, point_max.y),
+                    (point_min.z, point_max.z),
+                ),
                 Arc::clone(&material),
             ))
             .add(AARect::new_yz(
                 // right
-                AARectGeometry::new(pmax.x, (pmin.y, pmax.y), (pmin.z, pmax.z)),
+                AARectMetrics::new(
+                    point_max.x,
+                    (point_min.y, point_max.y),
+                    (point_min.z, point_max.z),
+                ),
                 Arc::clone(&material),
             ))
             .add(AARect::new_xz(
                 // down
-                AARectGeometry::new(pmin.y, (pmin.x, pmax.x), (pmin.z, pmax.z)),
+                AARectMetrics::new(
+                    point_min.y,
+                    (point_min.x, point_max.x),
+                    (point_min.z, point_max.z),
+                ),
                 Arc::clone(&material),
             ))
             .add(AARect::new_xz(
                 // up
-                AARectGeometry::new(pmax.y, (pmin.x, pmax.x), (pmin.z, pmax.z)),
+                AARectMetrics::new(
+                    point_max.y,
+                    (point_min.x, point_max.x),
+                    (point_min.z, point_max.z),
+                ),
                 Arc::clone(&material),
             ));
 
         Self {
-            min: pmin,
-            max: pmax,
+            point_min,
+            point_max,
             material,
             faces,
         }

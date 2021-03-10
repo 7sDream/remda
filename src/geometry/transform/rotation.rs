@@ -1,6 +1,6 @@
 use {
     crate::{
-        geometry::{Geometry, HitRecord, AABB},
+        geometry::{Geometry, HitRecord},
         prelude::*,
     },
     once_cell::sync::OnceCell,
@@ -17,9 +17,9 @@ pub struct ByYAxes;
 impl RotationByAxes for ByYAxes {
     fn rotate(point: &Point3, radian: f64) -> Point3 {
         Point3::new(
-            radian.cos() * point.x + radian.sin() * point.z,
+            radian.cos().mul_add(point.x, radian.sin() * point.z),
             point.y,
-            -radian.sin() * point.x + radian.cos() * point.z,
+            (-radian.sin()).mul_add(point.x, radian.cos() * point.z),
         )
     }
 }
@@ -36,7 +36,7 @@ impl<G> AARotation<ByYAxes, G> {
     pub fn new_by_y(geometry: G, angle: f64) -> Self {
         Self {
             geometry,
-            radian: d2r(angle),
+            radian: angle.to_radians(),
             bbox_cache: OnceCell::new(),
             axes: PhantomData,
         }
@@ -57,6 +57,7 @@ impl<Axes: RotationByAxes, G: Geometry> Geometry for AARotation<Axes, G> {
             })
     }
 
+    #[allow(clippy::cast_precision_loss)] // 0, 1 is small enough
     fn bbox(&self, time_limit: std::ops::Range<f64>) -> Option<AABB> {
         self.bbox_cache
             .get_or_init(|| {
@@ -68,9 +69,12 @@ impl<Axes: RotationByAxes, G: Geometry> Geometry for AARotation<Axes, G> {
                     for i in 0..2_usize {
                         for j in 0..2_usize {
                             for k in 0..2_usize {
-                                let x = i as f64 * bbox.max().x + (1 - i) as f64 * bbox.min().x;
-                                let y = j as f64 * bbox.max().y + (1 - j) as f64 * bbox.min().y;
-                                let z = k as f64 * bbox.max().z + (1 - k) as f64 * bbox.min().z;
+                                let x =
+                                    (i as f64).mul_add(bbox.max().x, (1 - i) as f64 * bbox.min().x);
+                                let y =
+                                    (j as f64).mul_add(bbox.max().y, (1 - j) as f64 * bbox.min().y);
+                                let z =
+                                    (k as f64).mul_add(bbox.max().z, (1 - k) as f64 * bbox.min().z);
 
                                 let rotated_point =
                                     Axes::rotate(&Point3::new(x, y, z), self.radian);

@@ -1,5 +1,7 @@
-use super::Texture;
-use crate::prelude::{Color, Point3};
+use crate::{
+    prelude::{Color, Point3},
+    texture::Texture,
+};
 
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]

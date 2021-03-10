@@ -1,4 +1,5 @@
 /target
 /.idea
-*.ppm
+/.vscode
+/*.ppm
 **/.DS_Store

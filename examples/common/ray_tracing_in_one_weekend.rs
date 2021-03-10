@@ -1,16 +1,16 @@
 use {
-    super::common,
-    remda::{camera::Camera, geometry::GeometryList},
+    super::scene,
+    remda::{camera::Camera, geometry::collection::GeometryList},
 };
 
 #[must_use]
 fn final_world(seed: Option<u64>) -> GeometryList {
-    common::world(seed, false, false)
+    scene::world(seed, false, false)
 }
 
 #[must_use]
 fn final_camera() -> Camera {
-    common::camera(false)
+    scene::camera(false)
 }
 
 #[must_use]

@@ -1,6 +1,6 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{GeometryList, Sphere},
+    geometry::{collection::GeometryList, Sphere},
     material::Lambertian,
     prelude::*,
     texture::Checker,
@@ -8,7 +8,7 @@ use remda::{
 
 fn main() {
     let mut world = GeometryList::default();
-    let checker = Checker::new(Color::newf(0.2, 0.3, 0.1), Color::newf(0.9, 0.9, 0.9));
+    let checker = Checker::new(Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9));
 
     world
         .add(Sphere::new(

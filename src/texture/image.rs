@@ -1,6 +1,5 @@
 use {
-    super::Texture,
-    crate::prelude::*,
+    crate::{prelude::*, texture::Texture},
     image::{DynamicImage, GenericImageView},
     std::{
         fmt::{Debug, Formatter},
@@ -46,6 +45,6 @@ impl Texture for Image {
         }
 
         let color = self.img.get_pixel(px, py);
-        Color::new(color.0[0], color.0[1], color.0[2])
+        Color::new_int(color.0[0], color.0[1], color.0[2])
     }
 }

@@ -3,7 +3,7 @@ mod common;
 
 use remda::{
     camera::CameraBuilder,
-    geometry::{Carton, Geometry, GeometryList},
+    geometry::{collection::GeometryList, Carton, Geometry},
     material::Lambertian,
     prelude::*,
 };
@@ -18,7 +18,7 @@ fn main() {
     let carton_at_origin = Carton::new(
         Point3::new(-0.5, 0.0, -0.5),
         Point3::new(0.5, 1.0, 0.5),
-        Lambertian::new(Color::newf(0.2, 0.2, 0.2)),
+        Lambertian::new(Color::new(0.2, 0.2, 0.2)),
     );
     let carton_moved = carton_at_origin.clone().translate(Vec3::new(2.0, 0.0, 0.0));
     world.add(carton_at_origin).add(carton_moved);

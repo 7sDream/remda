@@ -1,6 +1,8 @@
 use {
-    super::{Geometry, HitRecord, AABB},
-    crate::prelude::*,
+    crate::{
+        geometry::{Geometry, HitRecord},
+        prelude::*,
+    },
     std::{
         cmp::Ordering,
         fmt::{Debug, Formatter},

@@ -1,5 +1,5 @@
 use crate::{
-    geometry::{Geometry, HitRecord, AABB},
+    geometry::{Geometry, HitRecord},
     prelude::*,
 };
 
@@ -10,7 +10,7 @@ pub struct Translation<G> {
 }
 
 impl<G> Translation<G> {
-    pub fn new(geometry: G, movement: Vec3) -> Self {
+    pub const fn new(geometry: G, movement: Vec3) -> Self {
         Self { geometry, movement }
     }
 }

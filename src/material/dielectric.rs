@@ -1,6 +1,9 @@
 use {
-    super::{reflect, Material, ScatterRecord},
-    crate::{geometry::HitRecord, prelude::*},
+    crate::{
+        geometry::HitRecord,
+        material::{reflect, Material, ScatterRecord},
+        prelude::*,
+    },
     std::fmt::Debug,
 };
 
@@ -65,8 +68,8 @@ impl Dielectric {
             return None;
         }
         let r_parallel = refractive * (&dir + cos_theta * &hit.normal);
-        let r_perp = -(1.0 - r_parallel.length_squared()).sqrt() * &hit.normal;
-        let r = r_parallel + r_perp;
+        let r_perpendicular = -(1.0 - r_parallel.length_squared()).sqrt() * &hit.normal;
+        let r = r_parallel + r_perpendicular;
         Some(Ray::new(hit.point.clone(), r, ray.departure_time))
     }
 }

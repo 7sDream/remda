@@ -1,6 +1,8 @@
-use {
-    super::{Material, ScatterRecord},
-    crate::{geometry::HitRecord, prelude::*, texture::Texture},
+use crate::{
+    geometry::HitRecord,
+    material::{Material, ScatterRecord},
+    prelude::*,
+    texture::Texture,
 };
 
 #[derive(Debug, Clone)]
@@ -56,7 +58,7 @@ impl<T: Texture> Lambertian<T> {
 }
 
 impl<T: Texture> Material for Lambertian<T> {
-    fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<super::ScatterRecord> {
+    fn scatter(&self, ray: &Ray, hit: HitRecord<'_>) -> Option<ScatterRecord> {
         let color = self.texture.color(hit.u, hit.v, &hit.point);
         let new_ray = self.math_type.scatter_ray(ray, hit);
         Some(ScatterRecord {

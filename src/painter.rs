@@ -61,13 +61,13 @@ impl PPMImage {
     /// # Errors
     ///
     /// When image pixel count is not divisible by new width
-    pub fn reshape(&mut self, width: usize) -> Result<(), ()> {
+    pub fn reshape(&mut self, width: usize) -> Result<(), &'static str> {
         if self.colors.len() % width == 0 {
             self.width = width;
             self.height = self.colors.len() / width;
             Ok(())
         } else {
-            Err(())
+            Err("Shape invalid")
         }
     }
 }

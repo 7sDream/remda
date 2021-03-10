@@ -1,6 +1,9 @@
 use {
-    super::{Geometry, HitRecord, AABB},
-    crate::{material::Material, prelude::*},
+    crate::{
+        geometry::{Geometry, HitRecord},
+        material::Material,
+        prelude::*,
+    },
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
@@ -35,7 +38,7 @@ impl<M> Sphere<M> {
         }
     }
 
-    pub fn with_speed(mut self, speed: Vec3) -> Self {
+    pub const fn with_speed(mut self, speed: Vec3) -> Self {
         self.speed = speed;
         self
     }
@@ -79,6 +82,7 @@ impl<M: Material> Geometry for Sphere<M> {
         let half_b = ray.direction.dot(&l);
         let a = ray.direction.length_squared();
         let c = l.length_squared() - self.radius_squared;
+        #[allow(clippy::suspicious_operation_groupings)]
         let delta = half_b * half_b - a * c;
 
         if delta < 0.0 {

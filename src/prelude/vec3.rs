@@ -1,5 +1,5 @@
 use {
-    super::{clamp, Color, Random, PI},
+    crate::prelude::{clamp, Color, Random, PI},
     std::{
         fmt::Display,
         iter::Sum,
@@ -154,7 +154,7 @@ impl Vec3 {
             self.y = self.y.sqrt();
             self.z = self.z.sqrt();
         }
-        Color::newf(
+        Color::new(
             clamp(self.x, 0.0..=1.0),
             clamp(self.y, 0.0..=1.0),
             clamp(self.z, 0.0..=1.0),

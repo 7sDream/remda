@@ -1,4 +1,4 @@
-use remda::{camera::CameraBuilder, geometry::GeometryList};
+use remda::{camera::CameraBuilder, geometry::collection::GeometryList};
 
 fn main() {
     env_logger::init();

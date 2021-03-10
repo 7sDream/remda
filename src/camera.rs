@@ -1,7 +1,12 @@
 use {
-    crate::geometry::{Geometry, GeometryList, World},
-    crate::painter::Painter,
-    crate::prelude::*,
+    crate::{
+        geometry::{
+            collection::{GeometryList, World},
+            Geometry,
+        },
+        painter::Painter,
+        prelude::*,
+    },
     std::path::Path,
 };
 
@@ -24,7 +29,7 @@ impl Camera {
         look_from: &Point3, look_at: &Point3, vup: &Vec3, fov: f64, aspect_ratio: f64,
         aperture: f64, focus_distance: f64, shutter_speed: f64,
     ) -> Self {
-        let fov = d2r(fov);
+        let fov = fov.to_radians();
         let h = (fov / 2.0).tan();
         let vh = 2.0 * h;
         let vw = vh * aspect_ratio;
@@ -61,7 +66,7 @@ impl Camera {
 
     #[must_use]
     pub fn take_photo(&self, world: GeometryList) -> TakePhotoSettings<'_> {
-        let world = world.build(0.0..self.shutter_speed);
+        let world = World::new(world, 0.0..self.shutter_speed);
         TakePhotoSettings::new(self, world)
     }
 }
@@ -139,7 +144,7 @@ impl<'c> TakePhotoSettings<'c> {
             return Vec3::default();
         }
 
-        if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
+        if let Some(hit) = world.hit(ray, 0.001..f64::INFINITY) {
             let material = hit.material;
             let emitted = material
                 .emitted(hit.u, hit.v, &hit.point)

@@ -1,6 +1,6 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{GeometryList, Sphere},
+    geometry::{collection::GeometryList, Sphere},
     material::{Lambertian, LambertianMathType},
     prelude::*,
 };
@@ -14,12 +14,12 @@ fn main() {
         .add(Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximates),
+            Lambertian::new(Color::new(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximates),
         ))
         .add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximates),
+            Lambertian::new(Color::new(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximates),
         ));
 
     let camera = CameraBuilder::default().aspect_ratio(2.0).build();

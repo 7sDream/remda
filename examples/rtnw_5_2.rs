@@ -1,6 +1,6 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{GeometryList, Sphere},
+    geometry::{collection::GeometryList, Sphere},
     material::Lambertian,
     prelude::*,
     texture::{Perlin, SmoothType},
@@ -8,7 +8,7 @@ use remda::{
 
 fn main() {
     let mut world = GeometryList::default();
-    let perlin = Perlin::new(256, false).smooth(SmoothType::Interp);
+    let perlin = Perlin::new(256, false).smooth(SmoothType::LinearInterpolate);
 
     world
         .add(Sphere::new(

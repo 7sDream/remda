@@ -1,4 +1,4 @@
-use remda::{camera::CameraBuilder, geometry::GeometryList, prelude::*};
+use remda::{camera::CameraBuilder, geometry::collection::GeometryList, prelude::*};
 
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<f64> {
     let oc = &ray.origin - center;
@@ -22,7 +22,7 @@ fn background(ray: &Ray) -> Color {
     }
     let unit = ray.direction.unit();
     let t = 0.5 * (unit.y + 1.0);
-    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+    Color::new(1.0, 1.0, 1.0).gradient(&Color::new(0.5, 0.7, 1.0), t)
 }
 
 fn main() {

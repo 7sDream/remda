@@ -1,6 +1,8 @@
-use {
-    super::{Material, ScatterRecord},
-    crate::{geometry::HitRecord, prelude::*, texture::Texture},
+use crate::{
+    geometry::HitRecord,
+    material::{Material, ScatterRecord},
+    prelude::*,
+    texture::Texture,
 };
 
 #[derive(Debug, Clone)]

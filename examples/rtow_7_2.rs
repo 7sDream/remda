@@ -1,10 +1,11 @@
-use remda::{camera::CameraBuilder, geometry::GeometryList, prelude::*};
+use remda::{camera::CameraBuilder, geometry::collection::GeometryList, prelude::*};
 
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<(f64, Vec3)> {
     let oc = &ray.origin - center;
     let a = ray.direction.length_squared();
     let half_b = oc.dot(&ray.direction);
     let c = oc.length_squared() - radius * radius;
+    #[allow(clippy::suspicious_operation_groupings)]
     let discriminant = half_b * half_b - a * c;
     if discriminant < 0.0 {
         None
@@ -39,7 +40,7 @@ fn background(ray: &Ray) -> Color {
     }
     let unit = ray.direction.unit();
     let t = 0.5 * (unit.y + 1.0);
-    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+    Color::new(1.0, 1.0, 1.0).gradient(&Color::new(0.5, 0.7, 1.0), t)
 }
 
 fn main() {

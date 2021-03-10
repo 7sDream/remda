@@ -1,6 +1,6 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{AARect, AARectGeometry, GeometryList, Sphere},
+    geometry::{collection::GeometryList, AARect, AARectMetrics, Sphere},
     material::{DiffuseLight, Lambertian},
     prelude::*,
     texture::Perlin,
@@ -24,11 +24,11 @@ fn main() {
         .add(Sphere::new(
             Point3::new(0.0, 7.0, 0.0),
             2.0,
-            DiffuseLight::new(Color::newf(1.0, 1.0, 1.0)).multiplier(4.0),
+            DiffuseLight::new(Color::new(1.0, 1.0, 1.0)).multiplier(4.0),
         ))
         .add(AARect::new_xy(
-            AARectGeometry::new(-2.0, (3.0, 5.0), (1.0, 3.0)),
-            DiffuseLight::new(Color::newf(1.0, 1.0, 1.0)).multiplier(4.0),
+            AARectMetrics::new(-2.0, (3.0, 5.0), (1.0, 3.0)),
+            DiffuseLight::new(Color::new(1.0, 1.0, 1.0)).multiplier(4.0),
         ));
 
     let camera = CameraBuilder::default()

@@ -1,6 +1,6 @@
 use remda::{
     camera::{Camera, CameraBuilder},
-    geometry::{GeometryList, Sphere},
+    geometry::{collection::GeometryList, Sphere},
     material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
     texture::Checker,
@@ -24,7 +24,7 @@ fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: b
             {
                 let mat = rng.normal();
                 if mat < 0.8 {
-                    let color = Color::newf(rng.normal(), rng.normal(), rng.normal());
+                    let color = Color::new(rng.normal(), rng.normal(), rng.normal());
                     let material = Lambertian::new(color);
                     let mut sphere = Sphere::new(center, small_ball_radius, material);
                     if need_speed {
@@ -32,7 +32,7 @@ fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: b
                     }
                     world.add(sphere);
                 } else if mat < 0.95 {
-                    let color = Color::newf(
+                    let color = Color::new(
                         rng.range(0.5..1.0),
                         rng.range(0.5..1.0),
                         rng.range(0.5..1.0),
@@ -44,7 +44,7 @@ fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: b
                     world.add(Sphere::new(
                         center,
                         small_ball_radius,
-                        Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
+                        Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
                     ));
                 }
             }
@@ -56,19 +56,19 @@ fn add_big_balls(world: &mut GeometryList) {
     world.add(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
-        Dielectric::new(Color::newf(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
+        Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
     ));
 
     world.add(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
-        Lambertian::new(Color::newf(0.4, 0.2, 0.1)),
+        Lambertian::new(Color::new(0.4, 0.2, 0.1)),
     ));
 
     world.add(Sphere::new(
         Point3::new(4.0, 1.0, 0.0),
         1.0,
-        Metal::new(Color::newf(0.7, 0.6, 0.5)),
+        Metal::new(Color::new(0.7, 0.6, 0.5)),
     ));
 }
 
@@ -81,15 +81,15 @@ pub fn world(seed: Option<u64>, need_speed: bool, checker: bool) -> GeometryList
             Point3::new(0.0, -1000.0, 0.0),
             1000.0,
             Lambertian::new(Checker::new(
-                Color::newf(0.2, 0.3, 0.1),
-                Color::newf(0.9, 0.9, 0.9),
+                Color::new(0.2, 0.3, 0.1),
+                Color::new(0.9, 0.9, 0.9),
             )),
         ));
     } else {
         list.add(Sphere::new(
             Point3::new(0.0, -1000.0, 0.0),
             1000.0,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)),
+            Lambertian::new(Color::new(0.5, 0.5, 0.5)),
         ));
     };
 

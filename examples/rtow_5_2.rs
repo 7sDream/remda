@@ -1,4 +1,4 @@
-use remda::{camera::CameraBuilder, geometry::GeometryList, prelude::*};
+use remda::{camera::CameraBuilder, geometry::collection::GeometryList, prelude::*};
 
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
     let oc = &ray.origin - center;
@@ -11,9 +11,9 @@ fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
 
 fn background(ray: &Ray) -> Color {
     if hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray) {
-        return Color::newf(1.0, 0.0, 0.0);
+        return Color::new(1.0, 0.0, 0.0);
     }
-    remda::geometry::default_background(ray)
+    remda::geometry::collection::world_default_background(ray)
 }
 
 fn main() {

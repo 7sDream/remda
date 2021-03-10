@@ -1,15 +1,16 @@
-use crate::prelude::Point3;
 use {
-    super::clamp,
-    crate::texture::Texture,
+    crate::{
+        prelude::{clamp, vec3::Point3},
+        texture::Texture,
+    },
     std::{borrow::Cow, ops::Mul},
 };
 
 macro_rules! check0to1 {
     ($r: ident, $g: ident, $b: ident) => {
-        debug_assert!(0.0 <= $r && $r <= 1.0, "r = {}", $r);
-        debug_assert!(0.0 <= $g && $g <= 1.0, "g = {}", $g);
-        debug_assert!(0.0 <= $b && $b <= 1.0, "b = {}", $b);
+        debug_assert!((0.0_f64..=1.0_f64).contains(&$r), "r = {}", $r);
+        debug_assert!((0.0_f64..=1.0_f64).contains(&$g), "g = {}", $g);
+        debug_assert!((0.0_f64..=1.0_f64).contains(&$b), "b = {}", $b);
     };
 }
 
@@ -61,40 +62,40 @@ impl From<&RGBInt> for RGBFloat {
 
 #[derive(Debug, Clone)]
 pub enum Color {
-    RGBF(RGBFloat),
-    RGBI(RGBInt),
+    Float(RGBFloat),
+    Int(RGBInt),
 }
 
 impl Default for Color {
     fn default() -> Self {
-        Self::RGBF(RGBFloat::default())
+        Self::Float(RGBFloat::default())
     }
 }
 
 impl Color {
     #[must_use]
-    pub const fn new(r: u8, g: u8, b: u8) -> Self {
-        Self::RGBI(RGBInt::new(r, g, b))
+    pub const fn new_int(r: u8, g: u8, b: u8) -> Self {
+        Self::Int(RGBInt::new(r, g, b))
     }
 
     #[must_use]
-    pub fn newf(r: f64, g: f64, b: f64) -> Self {
-        Self::RGBF(RGBFloat::new(r, g, b))
+    pub fn new(r: f64, g: f64, b: f64) -> Self {
+        Self::Float(RGBFloat::new(r, g, b))
     }
 
     #[must_use]
     pub fn i(&self) -> Cow<'_, RGBInt> {
         match self {
-            Self::RGBF(c) => Cow::Owned(c.into()),
-            Self::RGBI(c) => Cow::Borrowed(c),
+            Self::Float(c) => Cow::Owned(c.into()),
+            Self::Int(c) => Cow::Borrowed(c),
         }
     }
 
     #[must_use]
     pub fn f(&self) -> Cow<'_, RGBFloat> {
         match self {
-            Self::RGBF(c) => Cow::Borrowed(c),
-            Self::RGBI(c) => Cow::Owned(c.into()),
+            Self::Float(c) => Cow::Borrowed(c),
+            Self::Int(c) => Cow::Owned(c.into()),
         }
     }
 
@@ -104,7 +105,7 @@ impl Color {
         let b = slide * rhs;
         let c1 = a.f();
         let c2 = b.f();
-        Self::newf(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b)
+        Self::new(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b)
     }
 }
 
@@ -119,7 +120,7 @@ impl Mul<&Color> for &Color {
     fn mul(self, rhs: &Color) -> Self::Output {
         let c1 = self.f();
         let c2 = rhs.f();
-        Color::newf(c1.r * c2.r, c1.g * c2.g, c1.b * c2.b)
+        Color::new(c1.r * c2.r, c1.g * c2.g, c1.b * c2.b)
     }
 }
 
@@ -148,7 +149,7 @@ impl Mul<f64> for &Color {
     type Output = Color;
     fn mul(self, rhs: f64) -> Self::Output {
         let c = self.f();
-        Color::newf(
+        Color::new(
             clamp(c.r * rhs, 0.0..=1.0),
             clamp(c.g * rhs, 0.0..=1.0),
             clamp(c.b * rhs, 0.0..=1.0),

@@ -1,6 +1,11 @@
 use {
-    super::{Geometry, HitRecord, AABB, BVH},
-    crate::prelude::*,
+    crate::{
+        geometry::{
+            collection::{GeometryList, BVH},
+            Geometry, HitRecord,
+        },
+        prelude::*,
+    },
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
@@ -11,7 +16,7 @@ use {
 pub fn default_background(ray: &Ray) -> Color {
     let unit = ray.direction.unit();
     let t = 0.5 * (unit.y + 1.0);
-    Color::newf(1.0, 1.0, 1.0).gradient(&Color::newf(0.5, 0.7, 1.0), t)
+    Color::new(1.0, 1.0, 1.0).gradient(&Color::new(0.5, 0.7, 1.0), t)
 }
 
 pub struct World {
@@ -27,9 +32,9 @@ impl Debug for World {
 
 impl World {
     #[must_use]
-    pub fn new(bvh: BVH) -> Self {
+    pub fn new(list: GeometryList, time_range: Range<f64>) -> Self {
         Self {
-            bvh,
+            bvh: BVH::new(list.into_objects(), time_range),
             bg_func: Box::new(default_background),
         }
     }

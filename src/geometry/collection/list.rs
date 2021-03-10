@@ -1,6 +1,8 @@
 use {
-    super::{Geometry, HitRecord, World, AABB, BVH},
-    crate::prelude::*,
+    crate::{
+        geometry::{Geometry, HitRecord},
+        prelude::*,
+    },
     std::{
         fmt::{Debug, Formatter},
         ops::Range,
@@ -38,8 +40,8 @@ impl GeometryList {
     }
 
     #[must_use]
-    pub fn build(self, time_limit: Range<f64>) -> World {
-        World::new(BVH::new(self.objects, time_limit))
+    pub fn into_objects(self) -> Vec<Box<dyn Geometry>> {
+        self.objects
     }
 }
 
@@ -60,7 +62,7 @@ impl Geometry for GeometryList {
 
         for object in &self.objects {
             let bbox = object.bbox(time_limit.clone())?;
-            result = result.map(|last| last | &bbox).or_else(|| Some(bbox))
+            result = result.map(|last| last | &bbox).or(Some(bbox))
         }
 
         result

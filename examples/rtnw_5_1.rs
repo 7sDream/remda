@@ -1,6 +1,6 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{GeometryList, Sphere},
+    geometry::{collection::GeometryList, Sphere},
     material::Lambertian,
     prelude::*,
     texture::{Perlin, SmoothType},

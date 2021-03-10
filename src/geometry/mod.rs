@@ -1,27 +1,23 @@
-pub(crate) mod aabb;
-pub(crate) mod bvh;
 pub(crate) mod carton;
 pub(crate) mod hit;
-pub(crate) mod list;
 pub(crate) mod rect;
 pub(crate) mod sphere;
-pub(crate) mod transform;
-pub(crate) mod world;
+
+pub mod transform;
+pub mod collection;
 
 use {
     crate::{material::Material, prelude::*},
+    transform::Translation,
     std::ops::Range,
 };
 
-pub(crate) use {aabb::AABB, bvh::BVH, hit::HitRecord};
+pub(crate) use hit::HitRecord;
 
 pub use {
     carton::Carton,
-    list::GeometryList,
-    rect::{AARect, AARectGeometry},
+    rect::{AARect, AARectMetrics},
     sphere::Sphere,
-    transform::{rotation::AARotation, translation::Translation},
-    world::{default_background, World},
 };
 
 #[allow(unused_variables)]

@@ -1,10 +1,12 @@
 use remda::geometry::Geometry;
 
 use {
-    super::common,
+    super::scene,
     remda::{
         camera::{Camera, CameraBuilder},
-        geometry::{AARect, AARectGeometry, AARotation, Carton, GeometryList},
+        geometry::{
+            collection::GeometryList, transform::AARotation, AARect, AARectMetrics, Carton,
+        },
         material::{DiffuseLight, Lambertian},
         prelude::*,
     },
@@ -12,12 +14,12 @@ use {
 
 #[must_use]
 fn motion_blur_world(seed: Option<u64>, checker: bool) -> GeometryList {
-    common::world(seed, true, checker)
+    scene::world(seed, true, checker)
 }
 
 #[must_use]
 fn motion_blur_camera() -> Camera {
-    common::camera(true)
+    scene::camera(true)
 }
 
 #[must_use]
@@ -27,36 +29,36 @@ pub fn motion_blur(seed: Option<u64>, checker: bool) -> (Camera, GeometryList) {
 
 #[must_use]
 pub fn cornell_box(carton: bool, carton_rotation: bool) -> (Camera, GeometryList) {
-    let red = Lambertian::new(Color::newf(0.65, 0.05, 0.05));
-    let green = Lambertian::new(Color::newf(0.12, 0.45, 0.15));
-    let white = Lambertian::new(Color::newf(0.73, 0.73, 0.73));
-    let light = DiffuseLight::new(Color::newf(1.0, 1.0, 1.0)).multiplier(15.0);
+    let red = Lambertian::new(Color::new(0.65, 0.05, 0.05));
+    let green = Lambertian::new(Color::new(0.12, 0.45, 0.15));
+    let white = Lambertian::new(Color::new(0.73, 0.73, 0.73));
+    let light = DiffuseLight::new(Color::new(1.0, 1.0, 1.0)).multiplier(15.0);
 
     let mut objects = GeometryList::default();
 
     objects
         .add(AARect::new_yz(
-            AARectGeometry::new(555.0, (0.0, 555.0), (0.0, 555.0)),
+            AARectMetrics::new(555.0, (0.0, 555.0), (0.0, 555.0)),
             green,
         ))
         .add(AARect::new_yz(
-            AARectGeometry::new(0.0, (0.0, 555.0), (0.0, 555.0)),
+            AARectMetrics::new(0.0, (0.0, 555.0), (0.0, 555.0)),
             red,
         ))
         .add(AARect::new_xz(
-            AARectGeometry::new(554.0, (213.0, 343.0), (227.0, 332.0)),
+            AARectMetrics::new(554.0, (213.0, 343.0), (227.0, 332.0)),
             light,
         ))
         .add(AARect::new_xz(
-            AARectGeometry::new(0.0, (0.0, 555.0), (0.0, 555.0)),
+            AARectMetrics::new(0.0, (0.0, 555.0), (0.0, 555.0)),
             white.clone(),
         ))
         .add(AARect::new_xz(
-            AARectGeometry::new(555.0, (0.0, 555.0), (0.0, 555.0)),
+            AARectMetrics::new(555.0, (0.0, 555.0), (0.0, 555.0)),
             white.clone(),
         ))
         .add(AARect::new_xy(
-            AARectGeometry::new(555.0, (0.0, 555.0), (0.0, 555.0)),
+            AARectMetrics::new(555.0, (0.0, 555.0), (0.0, 555.0)),
             white.clone(),
         ));
 

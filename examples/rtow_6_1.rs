@@ -1,4 +1,4 @@
-use remda::{camera::CameraBuilder, geometry::collection::GeometryList, prelude::*};
+use remda::{camera::CameraBuilder, hittable::collection::HittableList, prelude::*};
 
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<f64> {
     let oc = &ray.origin - center;
@@ -28,7 +28,7 @@ fn background(ray: &Ray) -> Color {
 fn main() {
     env_logger::init();
 
-    let world = GeometryList::default();
+    let world = HittableList::default();
 
     let camera = CameraBuilder::default().build();
 

@@ -1,6 +1,6 @@
 use {
     crate::{
-        geometry::{Geometry, HitRecord},
+        hittable::{Hittable, HitRecord},
         material::Material,
         prelude::*,
     },
@@ -48,7 +48,7 @@ impl<M> Sphere<M> {
     }
 }
 
-impl<M: Material> Geometry for Sphere<M> {
+impl<M: Material> Hittable for Sphere<M> {
     fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
         (p - &self.center) / self.radius
     }

@@ -1,13 +1,13 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{collection::GeometryList, Sphere},
+    hittable::{collection::HittableList, Sphere},
     material::Lambertian,
     prelude::*,
     texture::Checker,
 };
 
 fn main() {
-    let mut world = GeometryList::default();
+    let mut world = HittableList::default();
     let checker = Checker::new(Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9));
 
     world

@@ -1,5 +1,5 @@
 use {
-    crate::{geometry::HitRecord, prelude::*},
+    crate::{hittable::HitRecord, prelude::*},
     std::sync::Arc,
 };
 

@@ -1,5 +1,5 @@
 use crate::{
-    geometry::HitRecord,
+    hittable::HitRecord,
     material::{Material, ScatterRecord},
     prelude::*,
     texture::Texture,

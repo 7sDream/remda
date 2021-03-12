@@ -1,12 +1,12 @@
 use remda::{
     camera::{Camera, CameraBuilder},
-    geometry::{collection::GeometryList, Sphere},
+    hittable::{collection::HittableList, Sphere},
     material::{Dielectric, Glass, Lambertian, Metal},
     prelude::*,
     texture::Checker,
 };
 
-fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: bool) {
+fn add_small_balls(world: &mut HittableList, rng: &mut SeedRandom, need_speed: bool) {
     let small_ball_radius = 0.2;
     let mut avoid = Point3::new(0.0, 0.2, 0.0);
     for a in -11..11 {
@@ -52,7 +52,7 @@ fn add_small_balls(world: &mut GeometryList, rng: &mut SeedRandom, need_speed: b
     }
 }
 
-fn add_big_balls(world: &mut GeometryList) {
+fn add_big_balls(world: &mut HittableList) {
     world.add(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
@@ -73,8 +73,8 @@ fn add_big_balls(world: &mut GeometryList) {
 }
 
 #[must_use]
-pub fn world(seed: Option<u64>, need_speed: bool, checker: bool) -> GeometryList {
-    let mut list = GeometryList::default();
+pub fn world(seed: Option<u64>, need_speed: bool, checker: bool) -> HittableList {
+    let mut list = HittableList::default();
 
     if checker {
         list.add(Sphere::new(

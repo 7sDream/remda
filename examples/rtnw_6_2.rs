@@ -1,13 +1,13 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{collection::GeometryList, Sphere},
+    hittable::{collection::HittableList, Sphere},
     material::Lambertian,
     prelude::*,
     texture::Image,
 };
 
 fn main() {
-    let mut world = GeometryList::default();
+    let mut world = HittableList::default();
     // Image comes from http://visibleearth.nasa.gov/view.php?id=57752
     let earth_texture = Image::new("examples/earth-map.png").unwrap();
 

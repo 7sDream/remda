@@ -1,13 +1,13 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{collection::GeometryList, AARect, AARectMetrics, Sphere},
+    hittable::{collection::HittableList, AARect, AARectMetrics, Sphere},
     material::{DiffuseLight, Lambertian},
     prelude::*,
     texture::Perlin,
 };
 
 fn main() {
-    let mut world = GeometryList::default();
+    let mut world = HittableList::default();
     let perlin = Perlin::new(256, true).scale(4.0).marble(7);
 
     world

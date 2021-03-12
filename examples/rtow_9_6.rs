@@ -1,6 +1,6 @@
 use remda::{
     camera::CameraBuilder,
-    geometry::{collection::GeometryList, Sphere},
+    hittable::{collection::HittableList, Sphere},
     material::{Lambertian, Metal},
     prelude::*,
 };
@@ -8,7 +8,7 @@ use remda::{
 fn main() {
     env_logger::init();
 
-    let mut world = GeometryList::default();
+    let mut world = HittableList::default();
 
     world
         .add(Sphere::new(

@@ -1,8 +1,8 @@
 use {
     crate::{
-        geometry::{
-            collection::{GeometryList, BVH},
-            Geometry, HitRecord,
+        hittable::{
+            collection::{HittableList, BVH},
+            HitRecord, Hittable,
         },
         prelude::*,
     },
@@ -32,9 +32,9 @@ impl Debug for World {
 
 impl World {
     #[must_use]
-    pub fn new(list: GeometryList, time_range: Range<f64>) -> Self {
+    pub fn new(list: HittableList, time_range: Range<f64>) -> Self {
         Self {
-            bvh: BVH::new(list.into_objects(), time_range),
+            bvh: BVH::new(list, time_range),
             bg_func: Box::new(default_background),
         }
     }
@@ -53,7 +53,7 @@ impl World {
     }
 }
 
-impl Geometry for World {
+impl Hittable for World {
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.bvh.hit(ray, unit_limit)
     }

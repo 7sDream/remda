@@ -1,6 +1,6 @@
 use {
     crate::{
-        geometry::HitRecord,
+        hittable::HitRecord,
         material::{reflect, Material, ScatterRecord},
         prelude::*,
     },

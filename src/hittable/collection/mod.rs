@@ -4,6 +4,6 @@ pub(crate) mod world;
 
 pub use {
     bvh::BVH,
-    list::GeometryList,
+    list::HittableList,
     world::{default_background as world_default_background, World},
 };

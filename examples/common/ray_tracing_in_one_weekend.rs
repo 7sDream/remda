@@ -1,10 +1,10 @@
 use {
     super::scene,
-    remda::{camera::Camera, geometry::collection::GeometryList},
+    remda::{camera::Camera, hittable::collection::HittableList},
 };
 
 #[must_use]
-fn final_world(seed: Option<u64>) -> GeometryList {
+fn final_world(seed: Option<u64>) -> HittableList {
     scene::world(seed, false, false)
 }
 
@@ -14,6 +14,6 @@ fn final_camera() -> Camera {
 }
 
 #[must_use]
-pub fn final_scene(seed: Option<u64>) -> (Camera, GeometryList) {
+pub fn final_scene(seed: Option<u64>) -> (Camera, HittableList) {
     (final_camera(), final_world(seed))
 }

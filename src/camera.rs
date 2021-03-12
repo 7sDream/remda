@@ -1,8 +1,8 @@
 use {
     crate::{
-        geometry::{
-            collection::{GeometryList, World},
-            Geometry,
+        hittable::{
+            collection::{HittableList, World},
+            Hittable,
         },
         painter::Painter,
         prelude::*,
@@ -65,7 +65,7 @@ impl Camera {
     }
 
     #[must_use]
-    pub fn take_photo(&self, world: GeometryList) -> TakePhotoSettings<'_> {
+    pub fn take_photo(&self, world: HittableList) -> TakePhotoSettings<'_> {
         let world = World::new(world, 0.0..self.shutter_speed);
         TakePhotoSettings::new(self, world)
     }

@@ -1,6 +1,6 @@
 use {
     crate::{
-        geometry::{Geometry, HitRecord},
+        hittable::{collection::HittableList, HitRecord, Hittable},
         prelude::*,
     },
     std::{
@@ -13,8 +13,8 @@ use {
 #[derive(Default)]
 pub struct BVH {
     bbox: Option<AABB>,
-    left: Option<Box<dyn Geometry>>,
-    right: Option<Box<dyn Geometry>>,
+    left: Option<Box<dyn Hittable>>,
+    right: Option<Box<dyn Hittable>>,
 }
 
 impl Debug for BVH {
@@ -23,7 +23,7 @@ impl Debug for BVH {
     }
 }
 
-fn cmp_geometry_by(axis: usize, a: &dyn Geometry, b: &dyn Geometry) -> Ordering {
+fn cmp_geometry_by(axis: usize, a: &dyn Hittable, b: &dyn Hittable) -> Ordering {
     let box_a = a
         .bbox(0.0..0.0)
         .expect("No bounding box in bvh_node constructor");
@@ -38,7 +38,8 @@ fn cmp_geometry_by(axis: usize, a: &dyn Geometry, b: &dyn Geometry) -> Ordering 
 
 impl BVH {
     #[must_use]
-    pub fn new(objects: Vec<Box<dyn Geometry>>, time_limit: Range<f64>) -> Self {
+    pub fn new(objects: HittableList, time_limit: Range<f64>) -> Self {
+        let objects = objects.into_objects();
         if objects.is_empty() {
             Self::default()
         } else {
@@ -49,7 +50,7 @@ impl BVH {
     }
 
     fn new_internal(
-        objects: &mut Vec<Option<Box<dyn Geometry>>>, index: Range<usize>, time_limit: Range<f64>,
+        objects: &mut Vec<Option<Box<dyn Hittable>>>, index: Range<usize>, time_limit: Range<f64>,
     ) -> Self {
         let count = index.end - index.start;
 
@@ -103,7 +104,7 @@ impl BVH {
 }
 
 /// Bounding Volume Hierarchies
-impl Geometry for BVH {
+impl Hittable for BVH {
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         let bbox = self.bbox.as_ref()?;
         if !bbox.hit(ray, unit_limit.clone()) {

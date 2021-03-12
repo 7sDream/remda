@@ -4,7 +4,7 @@
 #![allow(clippy::module_name_repetitions, clippy::cast_possible_truncation)]
 
 pub mod camera;
-pub mod geometry;
+pub mod hittable;
 pub mod material;
 pub mod painter;
 pub mod prelude;

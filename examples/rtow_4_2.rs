@@ -1,9 +1,9 @@
-use remda::{camera::CameraBuilder, geometry::collection::GeometryList};
+use remda::{camera::CameraBuilder, hittable::collection::HittableList};
 
 fn main() {
     env_logger::init();
 
-    let world = GeometryList::default();
+    let world = HittableList::default();
 
     let camera = CameraBuilder::default().build();
 

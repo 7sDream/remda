@@ -1,6 +1,6 @@
 use {
     crate::{
-        geometry::{collection::GeometryList, AARect, AARectMetrics, Geometry, HitRecord},
+        hittable::{collection::HittableList, AARect, AARectMetrics, Hittable, HitRecord},
         material::Material,
         prelude::*,
     },
@@ -12,7 +12,7 @@ pub struct Carton<M> {
     point_min: Point3,
     point_max: Point3,
     material: Arc<M>,
-    faces: GeometryList,
+    faces: HittableList,
 }
 
 impl<M: Material + 'static> Clone for Carton<M> {
@@ -36,7 +36,7 @@ impl<M: Material + 'static> Carton<M> {
 
     #[allow(clippy::too_many_lines)]
     fn new_inner(point_min: Point3, point_max: Point3, material: Arc<M>) -> Self {
-        let mut faces = GeometryList::default();
+        let mut faces = HittableList::default();
         faces
             .add(AARect::new_xy(
                 // back
@@ -102,7 +102,7 @@ impl<M: Material + 'static> Carton<M> {
     }
 }
 
-impl<M: Material> Geometry for Carton<M> {
+impl<M: Material> Hittable for Carton<M> {
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         self.faces.hit(ray, unit_limit)
     }

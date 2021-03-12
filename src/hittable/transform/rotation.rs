@@ -1,6 +1,6 @@
 use {
     crate::{
-        geometry::{Geometry, HitRecord},
+        hittable::{HitRecord, Hittable},
         prelude::*,
     },
     once_cell::sync::OnceCell,
@@ -51,17 +51,17 @@ impl RotationByAxis for ByZAxis {
 }
 
 #[derive(Debug)]
-pub struct AARotation<Axis, G> {
-    geometry: G,
+pub struct AARotation<Axis, T> {
+    object: T,
     radian: f64,
     bbox_cache: OnceCell<Option<AABB>>,
     axes: PhantomData<Axis>,
 }
 
-impl<Axis, G> AARotation<Axis, G> {
-    pub fn new(geometry: G, angle: f64) -> Self {
+impl<Axis, T> AARotation<Axis, T> {
+    pub fn new(object: T, angle: f64) -> Self {
         Self {
-            geometry,
+            object,
             radian: angle.to_radians(),
             bbox_cache: OnceCell::new(),
             axes: PhantomData,
@@ -69,25 +69,23 @@ impl<Axis, G> AARotation<Axis, G> {
     }
 }
 
-impl<Axis: RotationByAxis, G: Geometry> Geometry for AARotation<Axis, G> {
+impl<Axis: RotationByAxis, T: Hittable> Hittable for AARotation<Axis, T> {
     fn hit(&self, ray: &Ray, unit_limit: std::ops::Range<f64>) -> Option<HitRecord<'_>> {
         let rotated_origin = Axis::rotate(&ray.origin, -self.radian);
         let rotated_direction = Axis::rotate(&ray.direction, -self.radian);
         let rotated_ray = Ray::new(rotated_origin, rotated_direction, ray.departure_time);
-        self.geometry
-            .hit(&rotated_ray, unit_limit)
-            .map(|mut record| {
-                record.point = Axis::rotate(&record.point, self.radian);
-                record.normal = Axis::rotate(&record.normal, self.radian);
-                record
-            })
+        self.object.hit(&rotated_ray, unit_limit).map(|mut record| {
+            record.point = Axis::rotate(&record.point, self.radian);
+            record.normal = Axis::rotate(&record.normal, self.radian);
+            record
+        })
     }
 
     #[allow(clippy::cast_precision_loss)] // 0, 1 is small enough
     fn bbox(&self, time_limit: std::ops::Range<f64>) -> Option<AABB> {
         self.bbox_cache
             .get_or_init(|| {
-                self.geometry.bbox(time_limit).map(|bbox| {
+                self.object.bbox(time_limit).map(|bbox| {
                     let mut point_min = Point3::new(f64::INFINITY, f64::INFINITY, f64::INFINITY);
                     let mut point_max =
                         Point3::new(f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY);

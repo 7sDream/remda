@@ -4,12 +4,14 @@ use {
 };
 
 pub(crate) mod dielectric;
+pub(crate) mod isotropic;
 pub(crate) mod lambertian;
 pub(crate) mod light;
 pub(crate) mod metal;
 
 pub use {
     dielectric::{Dielectric, Glass},
+    isotropic::Isotropic,
     lambertian::{Lambertian, LambertianMathType},
     light::DiffuseLight,
     metal::Metal,

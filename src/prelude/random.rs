@@ -32,6 +32,7 @@ fn shuffle<T, R: Rng, S: AsMut<[T]>>(mut rng: R, values: &mut S) {
 pub struct Random();
 
 impl Random {
+    // Return random number in range [0, 1]
     #[must_use]
     pub fn normal() -> f64 {
         normal(thread_rng())

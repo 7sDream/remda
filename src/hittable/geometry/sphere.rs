@@ -49,8 +49,8 @@ impl<M> Sphere<M> {
 }
 
 impl<M: Material> Hittable for Sphere<M> {
-    fn normal(&self, p: &Point3) -> crate::prelude::Vec3 {
-        (p - &self.center) / self.radius
+    fn normal(&self, point: &Point3) -> crate::prelude::Vec3 {
+        (point - &self.center) / self.radius
     }
 
     fn material(&self) -> &dyn Material {

@@ -70,7 +70,7 @@ impl<M> AARect<M> {
 }
 
 impl<M: Material> Hittable for AARect<M> {
-    fn normal(&self, _p: &Point3) -> Vec3 {
+    fn normal(&self, _point: &Point3) -> Vec3 {
         let mut n = Vec3::default();
         n[self.axis.2] = 1.0;
         n

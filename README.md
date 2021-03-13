@@ -12,6 +12,9 @@ Yet another naive and pure software ray tracing renderer.
 ![rendered image of RTNW's Cornell scene][rtnw-cornell-rotated-scene-render-result]
 *example rtnw_8_2, 10240 sample, 10 depth, 1000x1000, 1h20m*
 
+![rendered image of RTNW's Cornel smoke scene][rtnw-cornell-smoke-scene-render-result]
+*example rtnw_9_2, 10240 sample, 10 depth, 1000x1000, 1h30m*
+
 ## Current Progress
 
 - [x] [*Ray Tracing in One Weekend*][book-1]
@@ -35,7 +38,7 @@ Yet another naive and pure software ray tracing renderer.
   - [x] Cornell Box
   - [x] Box
   - [x] Instance Translation and Rotation
-  - [ ] Volumes
+  - [x] Volumes/Participating Media
 - [ ] [*Ray Tracing: The Rest of Your Life*][book-3] not started yet
 
 ## Run
@@ -72,5 +75,6 @@ Except:
 [book-3]: https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 [rtow-final-scene-render-result]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
 [rtnw-cornell-rotated-scene-render-result]: https://rikka.7sdre.am/files/1721b196-b746-4e6d-a4d0-f9c7c2e75c41.png
+[rtnw-cornell-smoke-scene-render-result]: https://rikka.7sdre.am/files/545972fd-d10d-4345-9e8c-3ba16fb50524.png
 [rayon-crates-io]: https://crates.io/crates/rayon
 [earth-map-source]: http://visibleearth.nasa.gov/view.php?id=57752

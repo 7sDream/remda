@@ -49,7 +49,7 @@ impl<'m> HitRecord<'m> {
 
 #[allow(unused_variables)]
 pub trait Hittable: Send + Sync {
-    fn normal(&self, p: &Point3) -> Vec3 {
+    fn normal(&self, point: &Point3) -> Vec3 {
         unimplemented!(
             "{}'s normal function should not be called directly",
             std::any::type_name::<Self>()

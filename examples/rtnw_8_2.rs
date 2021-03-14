@@ -6,7 +6,7 @@ use remda::prelude::*;
 fn main() {
     common::init_log("info");
 
-    let (camera, world) = common::ray_tracing_next_week::cornell_box(true, true, false);
+    let (camera, world) = common::ray_tracing_next_week::cornell_box();
 
     camera
         .take_photo(world)

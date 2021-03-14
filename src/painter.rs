@@ -8,7 +8,7 @@ use {
         iter::FromIterator,
         ops::{Index, IndexMut},
         path::Path,
-        sync::atomic::{AtomicBool, Ordering},
+        sync::atomic::{AtomicBool, AtomicUsize, Ordering},
     },
 };
 
@@ -280,9 +280,8 @@ impl Painter {
     }
 
     fn row_pixels_to_file(
-        &self, context: &mut PainterOutputContext<'_>, row: usize, pixels: Vec<(u8, u8, u8)>,
+        context: &mut PainterOutputContext<'_>, pixels: Vec<(u8, u8, u8)>,
     ) -> std::io::Result<()> {
-        info!("Scan line remaining: {}", self.height - row);
         Self::real_row_pixels_to_file(context, pixels).map_err(|e| {
             context.cancel.store(true, Ordering::Relaxed);
             e
@@ -294,11 +293,16 @@ impl Painter {
         F: Fn(f64, f64) -> Vec3 + Send + Sync,
     {
         let cancel = AtomicBool::new(false);
+        let finished_row = AtomicUsize::new(0);
 
         self.parallel_render_row_iter(uv_color, &cancel)
+            .inspect(|_| {
+                let count = finished_row.fetch_add(1, Ordering::Relaxed);
+                info!("Scan line remaining: {}", self.height - count - 1);
+            })
             .seq_for_each_with(
                 || self.create_output_context(path, &cancel),
-                |context, row, pixels| self.row_pixels_to_file(context, row, pixels),
+                |context, pixels| Self::row_pixels_to_file(context, pixels),
             )
     }
 
@@ -337,7 +341,8 @@ impl Painter {
             let cancel = AtomicBool::new(false); // useless in parallel mode
             let mut context = self.create_output_context(path, &cancel)?;
             for (row, pixels) in self.seq_render_row_iter(uv_color).enumerate() {
-                self.row_pixels_to_file(&mut context, row, pixels)?;
+                info!("Scan line remaining: {}", self.height - row);
+                Self::row_pixels_to_file(&mut context, pixels)?;
             }
             Ok(())
         }

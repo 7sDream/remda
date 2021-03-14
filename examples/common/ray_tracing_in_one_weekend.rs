@@ -5,12 +5,12 @@ use {
 
 #[must_use]
 fn final_world(seed: Option<u64>) -> HittableList {
-    scene::world(seed, false, false)
+    scene::balls_scene(seed, false, false)
 }
 
 #[must_use]
 fn final_camera() -> Camera {
-    scene::camera(false)
+    scene::balls_scene_camera(false)
 }
 
 #[must_use]

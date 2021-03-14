@@ -31,7 +31,7 @@ pub trait SeqForEach: IndexedParallelIterator {
     fn seq_for_each_with<SetUpRet, E: Send, SetUp, F>(self, setup: SetUp, mut f: F) -> Result<(), E>
     where
         SetUp: FnOnce() -> Result<SetUpRet, E> + Send,
-        F: FnMut(&mut SetUpRet, usize, Self::Item) -> Result<(), E> + Send,
+        F: FnMut(&mut SetUpRet, Self::Item) -> Result<(), E> + Send,
     {
         let (tx, rx) = channel();
         let mut ret = Ok(());
@@ -58,8 +58,8 @@ pub trait SeqForEach: IndexedParallelIterator {
                         if idx != expected {
                             break;
                         }
-                        let ReverseFirst(idx, item) = heap.pop().unwrap();
-                        if let e @ Err(_) = f(&mut context, idx, item) {
+                        let ReverseFirst(_idx, item) = heap.pop().unwrap();
+                        if let e @ Err(_) = f(&mut context, item) {
                             ret = e;
                             return;
                         }

@@ -1,6 +1,6 @@
 use {
     crate::{
-        hittable::{Hittable, HitRecord},
+        hittable::{HitRecord, Hittable},
         material::Material,
         prelude::*,
     },
@@ -10,6 +10,7 @@ use {
     },
 };
 
+#[derive(Clone)]
 pub struct Sphere<M> {
     center: Point3,
     radius: f64,

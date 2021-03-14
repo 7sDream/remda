@@ -55,6 +55,12 @@ impl Random {
 #[derive(Debug)]
 pub struct SeedRandom(StdRng);
 
+impl Default for SeedRandom {
+    fn default() -> Self {
+        Self::random()
+    }
+}
+
 impl SeedRandom {
     #[must_use]
     pub fn new(seed: u64) -> Self {

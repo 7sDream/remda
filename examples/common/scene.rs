@@ -1,14 +1,17 @@
-use remda::{
-    camera::{Camera, CameraBuilder},
-    hittable::{
-        collection::HittableList,
-        medium::ConstantMedium,
-        transform::{AARotation, ByYAxis, Translation},
-        AARect, AARectMetrics, Carton, Sphere,
+use {
+    remda::{
+        camera::{Camera, CameraBuilder},
+        hittable::{
+            collection::{HittableList, BVH},
+            medium::ConstantMedium,
+            transform::{AARotation, ByYAxis, Translation},
+            AARect, AARectMetrics, Carton, Sphere,
+        },
+        material::{Dielectric, DiffuseLight, Glass, Lambertian, Metal},
+        prelude::*,
+        texture::{Checker, Image, Perlin, SmoothType},
     },
-    material::{Dielectric, DiffuseLight, Glass, Lambertian, Metal},
-    prelude::*,
-    texture::Checker,
+    std::sync::Arc,
 };
 
 fn add_small_balls(world: &mut HittableList, rng: &mut SeedRandom, need_speed: bool) {
@@ -231,6 +234,133 @@ pub fn cornell_box_scene(
         .fov(40.0)
         .look_from(Point3::new(278.0, 278.0, -800.0))
         .look_at(Point3::new(278.0, 278.0, 0.0))
+        .build();
+
+    (camera, objects)
+}
+
+pub fn all_feature_scene(seed: Option<u64>) -> (Camera, HittableList) {
+    let time_limit = 0.0..1.0;
+    let boxes_per_side: usize = 20;
+    let mut rng = seed.map(SeedRandom::new).unwrap_or_default();
+
+    let mut boxes1 = HittableList::default();
+    let ground = Arc::new(Lambertian::new(Color::new(0.48, 0.83, 0.53)));
+    for i in 0..boxes_per_side {
+        for j in 0..boxes_per_side {
+            let w = 100.0;
+            let x0 = -1000.0 + i as f64 * w;
+            let z0 = -1000.0 + j as f64 * w;
+            let y0 = 0.0;
+            let x1 = x0 + w;
+            let y1 = rng.range(1.0..100.0);
+            let z1 = z0 + w;
+            boxes1.add(Carton::new(
+                Point3::new(x0, y0, z0),
+                Point3::new(x1, y1, z1),
+                Arc::clone(&ground),
+            ));
+        }
+    }
+
+    let mut objects = HittableList::default();
+    objects.add(BVH::new(boxes1, time_limit.clone()));
+
+    let light = DiffuseLight::new(Color::new(1.0, 1.0, 1.0)).multiplier(7.0);
+    objects.add(AARect::new_xz(
+        AARectMetrics::new(554.0, (123.0, 423.0), (147.0, 412.0)),
+        light,
+    ));
+
+    let moving_sphere = Sphere::new(
+        Point3::new(400.0, 400.0, 200.0),
+        50.0,
+        Lambertian::new(Color::new(0.7, 0.3, 0.1)),
+    )
+    .with_speed(Vec3::new(30.0, 0.0, 0.0));
+    objects.add(moving_sphere);
+
+    let glass_sphere = Sphere::new(
+        Point3::new(260.0, 150.0, 45.0),
+        50.0,
+        Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
+    );
+    objects.add(glass_sphere);
+
+    let metal_sphere = Sphere::new(
+        Point3::new(0.0, 150.0, 145.0),
+        50.0,
+        Metal::new(Color::new(0.8, 0.8, 0.9)).fuzz(1.0),
+    );
+    objects.add(metal_sphere);
+
+    let boundary = Sphere::new(
+        Point3::new(360.0, 170.0, 145.0),
+        70.0,
+        Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
+    );
+    objects.add(boundary);
+    objects.add(ConstantMedium::new(
+        Sphere::new(
+            Point3::new(360.0, 170.0, 145.0),
+            70.0,
+            Lambertian::new(Color::new(1.0, 1.0, 1.0)),
+        ),
+        Color::new(0.2, 0.4, 0.9),
+        0.2,
+    ));
+
+    objects.add(ConstantMedium::new(
+        Sphere::new(
+            Point3::new(0.0, 0.0, 0.0),
+            5000.0,
+            Dielectric::new(Color::new(1.0, 1.0, 1.0), 1.5).reflect_curve(Glass {}),
+        ),
+        Color::new(1.0, 1.0, 1.0),
+        0.0001,
+    ));
+
+    objects.add(Sphere::new(
+        Point3::new(400.0, 200.0, 400.0),
+        100.0,
+        Lambertian::new(Image::new("examples/earth-map.png").unwrap()),
+    ));
+
+    objects.add(Sphere::new(
+        Point3::new(220.0, 280.0, 300.0),
+        80.0,
+        Lambertian::new(
+            Perlin::new(256, true)
+                .scale(0.1)
+                .smooth(SmoothType::HermitianCubic),
+        ),
+    ));
+
+    let white = Arc::new(Lambertian::new(Color::new(0.73, 0.73, 0.73)));
+    let mut boxes2 = HittableList::default();
+    for _ in 0..1000_usize {
+        boxes2.add(Sphere::new(
+            Point3::new(
+                rng.range(0.0..165.0),
+                rng.range(0.0..165.0),
+                rng.range(0.0..165.0),
+            ),
+            10.0,
+            Arc::clone(&white),
+        ));
+    }
+
+    objects.add(Translation::new(
+        AARotation::<ByYAxis, _>::new(BVH::new(boxes2, time_limit), 15.0),
+        Vec3::new(-100.0, 270.0, 395.0),
+    ));
+
+    let camera = CameraBuilder::default()
+        .look_from(Point3::new(478.0, 278.0, -600.0))
+        .look_at(Point3::new(278.0, 278.0, 0.0))
+        .aspect_ratio(1.0)
+        .fov(40.0)
+        .shutter_speed(1.0)
         .build();
 
     (camera, objects)

@@ -3,6 +3,8 @@ use {
     remda::{camera::Camera, hittable::collection::HittableList},
 };
 
+pub use scene::all_feature_scene;
+
 #[must_use]
 fn motion_blur_world(seed: Option<u64>, checker: bool) -> HittableList {
     scene::balls_scene(seed, true, checker)

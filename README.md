@@ -6,8 +6,14 @@ Yet another naive and pure software ray tracing renderer.
 
 ## Render Result Examples
 
-![rendered image of RTOW's final scene][rtow-final-scene-render-result]
+![rendered image of RTOW's balls scene][rtow-balls-scene-render-result]
 *example rtow_13_1, 512 sample, 8 depth, 1920x1080, 8m30s*
+
+![rendered image of RTNW's balls motion blur scene][rtnw-balls-scene-motion-blur-render-result]
+*example rtnw_4_3, 1024 sample, 8 depth, 1920x1080, 22min*
+
+![rendered image of RTNW's ball with noise texture scene][rtnw-ball-noise-texture-scene-render-result]
+*example rtnw_7_4_2, 4096 sample, 8 depth, 1500x900, 15min*
 
 ![rendered image of RTNW's Cornell scene][rtnw-cornell-rotated-scene-render-result]
 *example rtnw_8_2, 10240 sample, 10 depth, 1000x1000, 1h20m*
@@ -76,7 +82,9 @@ Except:
 [book-1]: https://raytracing.github.io/books/RayTracingInOneWeekend.html
 [book-2]: https://raytracing.github.io/books/RayTracingTheNextWeek.html
 [book-3]: https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
-[rtow-final-scene-render-result]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
+[rtow-balls-scene-render-result]: https://rikka.7sdre.am/files/a952c7ca-af57-46a6-959f-237702333ab6.png
+[rtnw-balls-scene-motion-blur-render-result]: https://rikka.7sdre.am/files/a0f8d5bd-9bc5-4361-b1dc-4adabd9c9949.png
+[rtnw-ball-noise-texture-scene-render-result]: https://rikka.7sdre.am/files/e5b459c6-aa8e-47aa-ab20-33d430ba6b2f.png
 [rtnw-cornell-rotated-scene-render-result]: https://rikka.7sdre.am/files/1721b196-b746-4e6d-a4d0-f9c7c2e75c41.png
 [rtnw-cornell-smoke-scene-render-result]: https://rikka.7sdre.am/files/545972fd-d10d-4345-9e8c-3ba16fb50524.png
 [rtnw-final-scene-render-result]: https://rikka.7sdre.am/files/3e1e1849-54bf-4a7b-9e09-b2cc25b5cf6f.png

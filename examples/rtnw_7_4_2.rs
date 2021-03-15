@@ -1,3 +1,6 @@
+#[allow(dead_code)]
+mod common;
+
 use remda::{
     camera::CameraBuilder,
     hittable::{collection::HittableList, AARect, AARectMetrics, Sphere},
@@ -7,6 +10,8 @@ use remda::{
 };
 
 fn main() {
+    common::init_log("info");
+
     let mut world = HittableList::default();
     let perlin = Perlin::new(256, true).scale(4.0).marble(7);
 
